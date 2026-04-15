@@ -1,0 +1,6 @@
+# Built application files
+#*.apk
+
+.hvigor/
+.idea/
+oh_modules/

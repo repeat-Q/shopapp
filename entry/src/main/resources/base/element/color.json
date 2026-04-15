@@ -1,0 +1,60 @@
+{
+  "color": [
+    {
+      "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "main",
+      "value": "#EB5E1A"
+    },
+    {
+      "name": "tint_main",
+      "value": "#EB5E1A"
+    },
+    {
+      "name": "qing",
+      "value": "#FF03DAC5"
+    },
+    {
+      "name": "cccc",
+      "value": "#9D9B9B"
+    },
+    {
+      "name": "tint_gray",
+      "value": "#FFE3E0E0"
+    },
+    {
+      "name": "gray_bg",
+      "value": "#F2F2F2"
+    },
+    {
+      "name": "level1_color",
+      "value": "#66F3C1C1"
+    },
+    {
+      "name": "level2_color",
+      "value": "#2AFF7F00"
+    },
+    {
+      "name": "level3_color",
+      "value": "#36FFFF00"
+    },
+    {
+      "name": "level4_color",
+      "value": "#3200FF00"
+    },
+    {
+      "name": "level5_color",
+      "value": "#3900FFFF"
+    },
+    {
+      "name": "level6_color",
+      "value": "#3E0000FF"
+    },
+    {
+      "name": "level7_color",
+      "value": "#348B00FF"
+    }
+  ]
+}

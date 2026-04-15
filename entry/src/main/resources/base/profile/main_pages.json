@@ -1,0 +1,22 @@
+{
+  "src": [
+    "pages/SplashPage",
+    "pages/MainPage",
+    "pages/fragment/CartFragment",
+    "pages/fragment/FoodListFragment",
+    "pages/fragment/HomeFragment",
+    "pages/componentbase/ScrollPage",
+
+    "pages/shijian",
+    "pages/WelcomePage",
+
+    "pages/OrderPage",
+    "pages/LoginPage",
+    "pages/RegistPage",
+    "pages/geren",
+
+    "pages/meituan",
+    "pages/map"
+
+  ]
+}
