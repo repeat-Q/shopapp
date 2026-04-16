@@ -7,8 +7,18 @@ interface BalanceUpdateEventData {
   paymentAmount: number;
 }
 
-interface GeneratedTypeLiteralInterface_3 {
+interface BalanceUpdateEvent {
   data: BalanceUpdateEventData;
+}
+
+// 定义头像更新事件数据接口
+interface AvatarUpdateEventData {
+  avatarUri: string;
+}
+
+// 定义头像更新事件接口
+interface AvatarUpdateEvent {
+  data: AvatarUpdateEventData;
 }
 
 @Entry
@@ -16,6 +26,7 @@ interface GeneratedTypeLiteralInterface_3 {
 export struct HomeFragment {
   @State message: string = 'Hello World';
   @State userBalance: number = 2350;
+  @State avatarSrc: string | Resource = $r('app.media.chun01');
 
   toast(s: string) {
     promptAction.showToast({
@@ -28,23 +39,39 @@ export struct HomeFragment {
   aboutToAppear(): void {
     // 每次页面显示时都重新加载余额
     this.loadUserBalance();
+    this.loadSavedAvatar();
     
     // 监听余额更新事件
-    emitter.on({ eventId: 3 }, (event: GeneratedTypeLiteralInterface_3) => {
+    emitter.on({ eventId: 3 }, (event: BalanceUpdateEvent) => {
       // 直接更新UI
       this.userBalance = this.userBalance - event.data.paymentAmount;
+    });
+    emitter.on({ eventId: 5 }, (event: AvatarUpdateEvent) => {
+      this.avatarSrc = event.data.avatarUri;
     });
   }
 
   aboutToDisappear() {
     // 移除事件监听
     emitter.off(3);
+    emitter.off(5);
   }
 
   // 加载用户余额
   async loadUserBalance(): Promise<void> {
     try {
       this.userBalance = GlobalState.getBalance();
+    } catch (error) {
+    }
+  }
+
+  async loadSavedAvatar(): Promise<void> {
+    try {
+      const pref = (await import('../../util/PreferencesUtil')).default;
+      const uri = await pref.getPreferenceValue('user_avatar_uri', '') as string;
+      if (uri && uri.trim() !== '') {
+        this.avatarSrc = uri;
+      }
     } catch (error) {
     }
   }
@@ -61,7 +88,7 @@ export struct HomeFragment {
             Stack().width(65).height(65)
               .borderRadius(32.5)
               .backgroundColor(Color.White)
-            Image($r('app.media.chun01'))
+            Image(this.avatarSrc)
               .width(60)
               .width(60)
               .borderRadius(30)

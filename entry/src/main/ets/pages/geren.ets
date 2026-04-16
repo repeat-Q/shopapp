@@ -1,6 +1,8 @@
 import router from '@ohos.router';
 import { emitter } from '@kit.BasicServicesKit';
 import GlobalState from '../util/GlobalState';
+import { photoAccessHelper } from '@kit.MediaLibraryKit';
+import promptAction from '@ohos.promptAction';
 
 // 定义余额更新事件数据类型
 interface BalanceUpdateEventData {
@@ -9,6 +11,16 @@ interface BalanceUpdateEventData {
 
 interface BalanceUpdateEvent {
   data: BalanceUpdateEventData;
+}
+
+// 定义头像更新事件数据接口
+interface AvatarUpdateEventData {
+  avatarUri: string;
+}
+
+// 定义头像更新事件接口
+interface AvatarUpdateEvent {
+  data: AvatarUpdateEventData;
 }
 
 // 定义菜单项接口
@@ -21,7 +33,7 @@ interface MenuItem {
 @Entry
 @Component
 export struct geren {
-  @State avatar: Resource = $r('app.media.chun01');
+  @State avatarSrc: string | Resource = $r('app.media.chun01');
   @State studentId: string = '1120231734';
   @State hobbies: string[] = ['编程', '阅读', '运动', '音乐'];
   @State gender: string = '男';
@@ -43,17 +55,22 @@ export struct geren {
   aboutToAppear(): void {
     // 每次页面显示时都重新加载余额
     this.loadUserBalance();
+    this.loadSavedAvatar();
     
     // 监听余额更新事件
     emitter.on({ eventId: 3 }, (event: BalanceUpdateEvent) => {
       // 直接更新UI
       this.balance = this.balance - event.data.paymentAmount;
     });
+    emitter.on({ eventId: 5 }, (event: AvatarUpdateEvent) => {
+      this.avatarSrc = event.data.avatarUri;
+    });
   }
 
   aboutToDisappear() {
     // 移除事件监听
     emitter.off(3);
+    emitter.off(5);
   }
 
   // 加载用户余额
@@ -64,18 +81,74 @@ export struct geren {
     }
   }
 
+  showAvatarSheet(): void {
+    // 使用全局的 ActionSheet
+    ActionSheet.show({
+      title: '更换头像',
+      message: '请选择图片来源',
+      confirm: {
+        defaultFocus: true,
+        value: '取消',
+        action: () => {
+          // 取消按钮的回调，这里不需要做任何操作
+        }
+      },
+      sheets: [
+        {
+          title: '从相册选择',
+          action: () => {
+            this.pickImage();
+          }
+        }
+      ]
+    });
+  }
+
+  async pickImage(): Promise<void> {
+    try {
+      const options = new photoAccessHelper.PhotoSelectOptions();
+      options.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
+      options.maxSelectNumber = 1;
+      const photoPicker = new photoAccessHelper.PhotoViewPicker();
+      const result = await photoPicker.select(options);
+      if (result.photoUris && result.photoUris.length > 0) {
+        const uri = result.photoUris[0];
+        this.avatarSrc = uri;
+        const pref = (await import('../util/PreferencesUtil')).default;
+        await pref.putPreferenceValue('user_avatar_uri', uri);
+        emitter.emit({ eventId: 5 }, { data: { avatarUri: uri } });
+      }
+    } catch (error) {
+      // 用户取消选择不提示
+    }
+  }
+
+  async loadSavedAvatar(): Promise<void> {
+    try {
+      const pref = (await import('../util/PreferencesUtil')).default;
+      const uri = await pref.getPreferenceValue('user_avatar_uri', '') as string;
+      if (uri && uri.trim() !== '') {
+        this.avatarSrc = uri;
+      }
+    } catch (error) {
+    }
+  }
+
   build() {
     Scroll() {
       Column() {
         // ========== 顶部个人信息卡片 ==========
       Column() {
         // 头像
-        Image(this.avatar)
+        Image(this.avatarSrc)
           .width(80)
           .height(80)
           .borderRadius(40)
           .border({ width: 3, color: '#EB5E1A' })
           .margin({ top: 20 })
+          .onClick(() => {
+            this.showAvatarSheet();
+          })
 
         // 用户名
         Text(this.username)
