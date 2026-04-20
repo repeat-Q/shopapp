@@ -57,6 +57,20 @@
           ],
           "when":"inuse"
         }
+      },
+      {
+        "name" : "ohos.permission.LOCATION",
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when":"inuse"
+        }
+      },
+      {
+        "name" : "ohos.permission.LOCATION_IN_USE",
+        "usedScene": {
+          "abilities": ["EntryAbility"],
+          "when":"inuse"
+        }
       }
     ]
   }

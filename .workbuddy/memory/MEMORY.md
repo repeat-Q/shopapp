@@ -29,7 +29,8 @@
 - **关键**：必须先定义 `window._AMapSecurityConfig = { securityJsCode: '...' }` 再加载地图 JS
 - JS_KEY: `3a5628188e4853dcff3425f59058a32b`（用于加载地图）
 - WEB_KEY: `5c4aff1e82b1c39bd6733d6146fa9caa`（用于 REST API）
-- securityJsCode: `24b5627188e4853dcff3425f59058a32b`（v2.0必须）
+- securityJsCode: `24b4877388301846de3978ea560d6c25`（v2.0必须，注意不是之前的24b5开头的）
+- 加载策略：动态创建script标签，先试v2.0+securityJsCode，onerror自动降级v1.4.15
 - v2.0 插件需用 `AMap.plugin()` 动态加载，不能仅靠 URL 参数
 - 默认起点：北京天安门 [116.397428, 39.90923]
 
