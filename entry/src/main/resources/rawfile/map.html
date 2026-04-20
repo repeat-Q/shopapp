@@ -159,12 +159,14 @@
       </div>
       <div class="input-group">
         <div style="position:relative">
-          <input id="startInput" class="start-input" type="text" placeholder="起点（点🔍搜索）" value="天安门广场">
-          <button id="searchStartBtn" onclick="doSearchStart()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#50E3C2;">🔍</button>
+          <input id="startInput" class="start-input" type="text" placeholder="点此设置起点" value="天安门广场"
+                 onclick="doSearchStart()" style="cursor:text;padding-right:32px">
+          <button id="searchStartBtn" onclick="doSearchStart()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#50E3C2;z-index:1;">✏️</button>
         </div>
         <div style="position:relative">
-          <input id="endInput" type="text" placeholder="终点（点🔍搜索）" value="">
-          <button id="searchEndBtn" onclick="doSearchEnd()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#EB5E1A;">🔍</button>
+          <input id="endInput" type="text" placeholder="点此设置终点" value=""
+                 onclick="doSearchEnd()" style="cursor:text;padding-right:32px">
+          <button id="searchEndBtn" onclick="doSearchEnd()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#EB5E1A;z-index:1;">✏️</button>
         </div>
       </div>
       <button class="swap-btn" id="swapBtn" title="互换起终点">⇅</button>
@@ -177,8 +179,8 @@
     </div>
 
     <div id="search-row">
-      <input id="keyword" type="text" placeholder="输入地点关键词后点搜索">
-      <button class="btn-search" onclick="doKeywordSearch()">🔍</button>
+      <input id="keyword" type="text" placeholder="输入地点名称，点下方搜索">
+      <button class="btn-search" onclick="doKeywordSearch()">搜索</button>
       <button class="btn-cancel" onclick="cancelKeywordSearch()">取消</button>
     </div>
 
@@ -414,34 +416,33 @@
     // ==================== 搜索起点 ====================
     function doSearchStart() {
       mapClickMode = 'start';
-      var kw = document.getElementById('startInput').value.replace(/天安门广场|地图选点/g, '').trim();
-      if (kw) {
-        document.getElementById('keyword').value = kw;
-        doKeywordSearch();
-      } else {
-        document.getElementById('keyword').value = '';
-        document.getElementById('keyword').placeholder = '输入起点关键词';
-      }
+      var kw = document.getElementById('startInput').value.replace(/天安门广场|地图选点/g, '').replace(/^\s+|\s+$/, '');
+      document.getElementById('keyword').value = kw;
+      document.getElementById('keyword').placeholder = '输入起点地名';
       document.getElementById('result-list').style.display = 'none';
       document.getElementById('result-list-start').style.display = 'block';
       document.getElementById('search-row').style.display = 'flex';
+      // 自动聚焦到搜索框
+      var kwi = document.getElementById('keyword');
+      kwi.focus();
+      kwi.select();
+      if (kw) doKeywordSearch();
       log('🔍 搜索起点');
     }
 
     // ==================== 搜索终点 ====================
     function doSearchEnd() {
       mapClickMode = 'end';
-      var kw = document.getElementById('endInput').value.replace(/地图选点/g, '').trim();
-      if (kw) {
-        document.getElementById('keyword').value = kw;
-        doKeywordSearch();
-      } else {
-        document.getElementById('keyword').value = '';
-        document.getElementById('keyword').placeholder = '输入终点关键词';
-      }
+      var kw = document.getElementById('endInput').value.replace(/地图选点/g, '').replace(/^\s+|\s+$/, '');
+      document.getElementById('keyword').value = kw;
+      document.getElementById('keyword').placeholder = '输入终点地名';
       document.getElementById('result-list-start').style.display = 'none';
       document.getElementById('result-list').style.display = 'block';
       document.getElementById('search-row').style.display = 'flex';
+      var kwi = document.getElementById('keyword');
+      kwi.focus();
+      kwi.select();
+      if (kw) doKeywordSearch();
       log('🔍 搜索终点');
     }
 
@@ -528,14 +529,16 @@
 
       var url = '';
       if (currentRouteType === 'driving') {
-        url = urlBase + 'driving?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&extensions=base&output=json';
+        // strategy=0=推荐（综合考虑时间/距离/拥堵），extensions=all含实时路况
+        url = urlBase + 'driving?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&strategy=0&extensions=all&output=json';
       } else if (currentRouteType === 'walking') {
-        url = urlBase + 'walking?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&output=json';
+        // strategy=0=推荐
+        url = urlBase + 'walking?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&strategy=0&output=json';
       } else if (currentRouteType === 'transit') {
-        // 公交用city=北京（高德要求城市名）
+        // strategy=5=少换乘，city为出发城市名
         url = 'https://restapi.amap.com/v3/direction/transit/integrated?key=' + WEB_KEY +
           '&origin=' + originStr + '&destination=' + destStr +
-          '&city=北京&cityd=北京&strategy=0&output=json';
+          '&city=北京&cityd=北京&strategy=5&output=json';
       }
 
       xhrGet(url, function(data) {
