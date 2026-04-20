@@ -270,6 +270,7 @@
 
     // ====== 4. 日志 ======
     function log(msg) {
+      console.log('[MAP]', msg);
       var d = document.getElementById('debug');
       if (d) d.innerHTML = msg;
     }
