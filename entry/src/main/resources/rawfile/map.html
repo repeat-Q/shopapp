@@ -138,13 +138,10 @@
     /* 调试 */
     #debug {
       position: fixed; bottom: 8px; left: 8px;
-      background: rgba(0,0,0,0.55); color: #0f0; font-size: 10px;
-      padding: 4px 8px; border-radius: 4px; z-index: 9999; max-width: 65%; opacity: 0.7;
+      background: rgba(0,0,0,0.65); color: #0f0; font-size: 10px;
+      padding: 4px 8px; border-radius: 4px; z-index: 9999; max-width: 80%; opacity: 0.8;
       word-break: break-all;
     }
-
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    .loading { display: inline-block; animation: spin 0.8s linear infinite; }
   </style>
 </head>
 <body>
@@ -202,21 +199,16 @@
   <!-- 定位按钮 -->
   <button id="locBtn" onclick="locateMe()">📍</button>
 
-  <div id="debug">🔑 初始化安全密钥...</div>
+  <div id="debug">⏳ 开始加载地图...</div>
 
-  <!-- ========== 关键：必须先定义安全密钥配置，再加载地图 ========== -->
+  <!-- ========== 第一段：安全密钥 + 全局变量 + 工具函数 ========== -->
   <script>
-    // 安全密钥配置（必须在加载地图JS之前定义）
+    // ====== 安全密钥（必须在加载地图JS之前设置）======
     window._AMapSecurityConfig = {
       securityJsCode: '24b4877388301846de3978ea560d6c25'
     };
-  </script>
 
-  <!-- 高德地图 JS API v2.0 + securityJsCode -->
-  <script src="https://webapi.amap.com/maps?v=2.0&key=3a5628188e4853dcff3425f59058a32b&plugin=AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Riding,AMap.Transfer&callback=onAMapReady"></script>
-
-  <script>
-    // ==================== 全局变量 ====================
+    // ====== 全局变量 ======
     var map = null;
     var markerStart = null;
     var markerEnd = null;
@@ -232,40 +224,22 @@
     var mapStyleNames = ['默认', '浅色', '深色', '马卡龙'];
     var mapLoaded = false;
     var trafficOn = false;
-    var loadTimeout = null;
-
-    // API Key (Web服务Key用于REST API)
+    var JS_KEY = '3a5628188e4853dcff3425f59058a32b';
     var WEB_KEY = '5c4aff1e82b1c39bd6733d6146fa9caa';
 
-    // ==================== 日志 ====================
+    var routeNames = { driving: '驾车', walking: '步行', riding: '骑行', transit: '公交' };
+    var routeIcons = { driving: '🚗', walking: '🚶', riding: '🚲', transit: '🚌' };
+
+    // ====== 日志 ======
     function log(msg) {
       var d = document.getElementById('debug');
-      if (d) d.innerHTML = msg;
+      if (d) { d.innerHTML = msg; console.log('[MAP] ' + msg); }
     }
 
-    // ==================== 地图初始化回调 ====================
-    function onAMapReady() {
-      log('🔧 地图引擎就绪，初始化插件...');
+    // ====== 创建地图（成功后回调）======
+    function createMap() {
       try {
-        // v2.0: 动态加载插件（更可靠）
-        AMap.plugin([
-          'AMap.PlaceSearch',
-          'AMap.Driving',
-          'AMap.Walking',
-          'AMap.Riding',
-          'AMap.Transfer',
-          'AMap.Geolocation'
-        ], function() {
-          log('✅ 插件加载完成，创建地图...');
-          initMap();
-        });
-      } catch(e) {
-        log('❌ 插件加载错误: ' + e.message);
-      }
-    }
-
-    function initMap() {
-      try {
+        log('🗺️ 创建地图实例...');
         map = new AMap.Map('container', {
           zoom: 13,
           center: currentPos,
@@ -273,33 +247,89 @@
           viewMode: '2D'
         });
 
-        // 地图点击设为终点
         map.on('click', function(e) {
           document.getElementById('endInput').value = '地图选点';
           setDestination(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
         });
 
-        mapLoaded = true;
-        clearTimeout(loadTimeout);
-        renderStartMarker();
-        log('✅ 就绪 | 搜索或点击地图选终点');
+        map.on('complete', function() {
+          mapLoaded = true;
+          renderStartMarker();
+          log('✅ 地图就绪！搜索或点击地图');
+        });
+
+        // 兜底：如果 complete 3秒没触发也标记就绪
+        setTimeout(function() {
+          if (!mapLoaded) {
+            mapLoaded = true;
+            renderStartMarker();
+            log('✅ 地图就绪！搜索或点击地图');
+          }
+        }, 3000);
+
       } catch(e) {
-        log('❌ 初始化错误: ' + e.message);
+        log('❌ 创建地图失败: ' + e.message);
       }
     }
 
-    // 超时兜底（12秒内未加载则报错）
-    loadTimeout = setTimeout(function() {
+    // ====== 动态加载地图JS（带降级）======
+    function loadAMapScript(version) {
+      log('📦 加载地图 v' + version + '...');
+
+      var plugins = 'AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Riding,AMap.Transfer';
+      var url = 'https://webapi.amap.com/maps?v=' + version +
+        '&key=' + JS_KEY +
+        '&plugin=' + plugins;
+
+      var sc = document.createElement('script');
+      sc.src = url;
+
+      sc.onload = function() {
+        log('📦 v' + version + ' 脚本已下载');
+        // v2.0 需要额外加载插件
+        if (version === '2.0' && AMap.plugin) {
+          AMap.plugin([plugins], function() {
+            log('🔌 v2.0 插件加载完成');
+            createMap();
+          });
+        } else {
+          createMap();
+        }
+      };
+
+      sc.onerror = function() {
+        if (version === '2.0') {
+          log('⚠️ v2.0 加载失败，降级到 v1.4.15...');
+          // 降级时清除旧的安全配置（v1.4不需要）
+          delete window._AMapSecurityConfig;
+          loadAMapScript('1.4.15');
+        } else {
+          log('❌ 地图加载失败，请检查网络');
+        }
+      };
+
+      document.head.appendChild(sc);
+    }
+
+    // ====== 超时检测 ======
+    setTimeout(function() {
       if (!mapLoaded) {
-        log('❌ 加载超时，<a href="javascript:retryLoad()" style="color:#0f0">点此重试</a>');
+        log('⏳ 加载较慢，请稍候...');
       }
-    }, 12000);
+    }, 10000);
 
-    function retryLoad() {
-      log('重新加载中...');
-      location.reload();
-    }
+    setTimeout(function() {
+      if (!mapLoaded) {
+        log('❌ 加载超时 | <span onclick="location.reload()" style="color:#ff0;cursor:pointer">点此重试</span>');
+      }
+    }, 20000);
 
+    // ====== 启动加载 ======
+    loadAMapScript('2.0');
+  </script>
+
+  <!-- ========== 第二段：功能函数（在地图加载后可用）========== -->
+  <script>
     // ==================== 起点标记 ====================
     function renderStartMarker() {
       if (!map) return;
@@ -344,7 +374,7 @@
     function doSearch() {
       var keyword = document.getElementById('keyword').value.trim();
       if (!keyword) { log('请输入关键词'); return; }
-      log('搜索: ' + keyword);
+      log('🔍 搜索: ' + keyword);
 
       var list = document.getElementById('result-list');
       list.style.display = 'block';
@@ -377,7 +407,7 @@
                   document.getElementById('keyword').value = '';
                   setDestination(parseFloat(c[0]), parseFloat(c[1]), n);
                 };
-              })(coords, poi.name));
+              })(coords, poi.name);
               list.appendChild(item);
             });
           } else {
@@ -394,7 +424,7 @@
     // ==================== 路线规划 ====================
     function planRoute() {
       if (!currentDest || !map) return;
-      log('规划' + routeNames[currentRouteType] + '路线...');
+      log('🧭 规划' + routeNames[currentRouteType] + '路线...');
       clearRoute();
 
       markerEnd = new AMap.Marker({
@@ -420,9 +450,6 @@
         .then(function(data) { handleRoute(data, currentRouteType); })
         .catch(function(e) { log('❌ 请求失败: ' + e.message); });
     }
-
-    var routeNames = { driving: '驾车', walking: '步行', riding: '骑行', transit: '公交' };
-    var routeIcons = { driving: '🚗', walking: '🚶', riding: '🚲', transit: '🚌' };
 
     // ==================== 处理路线结果 ====================
     function handleRoute(data, type) {
@@ -557,6 +584,7 @@
 
     // ==================== 清除路线 ====================
     function clearRoute() {
+      if (!map) return;
       if (routePolyline) { map.remove(routePolyline); routePolyline = null; }
       if (routeCopyLine) { map.remove(routeCopyLine); routeCopyLine = null; }
       if (markerEnd) { map.remove(markerEnd); markerEnd = null; }
@@ -569,6 +597,7 @@
     }
 
     function toggleTraffic() {
+      if (!map) return;
       var btn = document.getElementById('trafficBtn');
       if (!trafficLayer) {
         trafficLayer = new AMap.TileLayer.Traffic({ zIndex: 8 });
@@ -583,11 +612,10 @@
     }
 
     function toggleMapStyle() {
+      if (!map) return;
       mapStyleIdx = (mapStyleIdx + 1) % mapStyles.length;
-      if (map) {
-        map.setMapStyle('amap://styles/' + mapStyles[mapStyleIdx]);
-        log('🗺️ 样式: ' + mapStyleNames[mapStyleIdx]);
-      }
+      map.setMapStyle('amap://styles/' + mapStyles[mapStyleIdx]);
+      log('🗺️ 样式: ' + mapStyleNames[mapStyleIdx]);
     }
 
     // ==================== 定位 ====================
@@ -599,7 +627,7 @@
           if (map) { map.setCenter(currentPos); map.setZoom(15); }
           renderStartMarker();
           document.getElementById('startInput').value = '我的位置';
-          log('✅ 定位成功: ' + currentPos[0].toFixed(4) + ',' + currentPos[1].toFixed(4));
+          log('✅ 定位成功');
         }, function(e) {
           log('❌ 定位失败: ' + (e.message || '权限'));
         }, { enableHighAccuracy: true, timeout: 8000 });
@@ -609,11 +637,9 @@
     }
 
     // ==================== 回车事件 ====================
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('keyword').addEventListener('keypress', function(e) { if (e.key === 'Enter') doSearch(); });
-      document.getElementById('endInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && this.value.trim()) setDestination(null, null, this.value.trim());
-      });
+    document.getElementById('keyword').addEventListener('keypress', function(e) { if (e.key === 'Enter') doSearch(); });
+    document.getElementById('endInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && this.value.trim()) setDestination(null, null, this.value.trim());
     });
   </script>
 </body>

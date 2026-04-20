@@ -24,6 +24,15 @@
 6. ✅ 项目痕迹清理：移除所有调试日志、原始标识符、文件名注释
 7. ✅ Git已提交
 
+### 地图页面 (map.ets + map.html)
+- 方案：WebView + 本地 HTML + 高德 JS API v2.0
+- **关键**：必须先定义 `window._AMapSecurityConfig = { securityJsCode: '...' }` 再加载地图 JS
+- JS_KEY: `3a5628188e4853dcff3425f59058a32b`（用于加载地图）
+- WEB_KEY: `5c4aff1e82b1c39bd6733d6146fa9caa`（用于 REST API）
+- securityJsCode: `24b5627188e4853dcff3425f59058a32b`（v2.0必须）
+- v2.0 插件需用 `AMap.plugin()` 动态加载，不能仅靠 URL 参数
+- 默认起点：北京天安门 [116.397428, 39.90923]
+
 ### 已知Bug（待修复）
 1. PreferencesUtil已初始化但未使用（登录状态未持久化）
 2. 首页余额/积分/用户名全部硬编码
