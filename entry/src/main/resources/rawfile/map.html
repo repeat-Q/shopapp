@@ -26,16 +26,27 @@
     .dot.start { background: #50E3C2; }
     .dot.end { background: #EB5E1A; }
     .route-line { width: 10px; height: 22px; border-left: 2px dashed #ddd; margin-left: 4px; margin-bottom: 2px; }
-    .input-group { flex: 1; position: relative; }
-    .input-group input {
+    .input-group { flex: 1; }
+    .input-row { position: relative; margin-bottom: 4px; }
+    .input-row:last-child { margin-bottom: 0; }
+    .input-row input {
       width: 100%; height: 34px; border: 1px solid #e0e0e0;
-      border-radius: 8px; padding: 0 28px 0 10px; font-size: 13px;
-      outline: none; background: #fafafa; margin-bottom: 4px; display: block;
+      border-radius: 8px; padding: 0 36px 0 10px; font-size: 13px;
+      outline: none; background: #fafafa; display: block;
     }
-    .input-group input:last-child { margin-bottom: 0; }
-    .input-group input.start-input { background: #f0fdf9; border-color: #bbf7d0; }
-    .input-group input:focus { border-color: #EB5E1A; background: #fff; }
-    .input-group input.start-input:focus { border-color: #50E3C2; }
+    .input-row input.start-row { background: #f0fdf9; border-color: #bbf7d0; }
+    .input-row input:focus { border-color: #EB5E1A; background: #fff; }
+    .input-row input.start-row:focus { border-color: #50E3C2; }
+    .input-row .btn-edit {
+      position: absolute; right: 4px; top: 50%;
+      transform: translateY(-50%);
+      width: 28px; height: 28px;
+      background: none; border: none;
+      font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 4px;
+    }
+    .input-row .btn-edit:active { background: rgba(0,0,0,0.06); }
     .swap-btn {
       width: 28px; height: 28px; border: 1px solid #e0e0e0; background: #f5f5f5;
       border-radius: 50%; cursor: pointer; font-size: 14px;
@@ -52,9 +63,7 @@
       display: flex; align-items: center; justify-content: center;
       gap: 4px; color: #666; font-weight: 500;
     }
-    .tab-btn.active {
-      background: #EB5E1A; color: #fff; border-color: #EB5E1A;
-    }
+    .tab-btn.active { background: #EB5E1A; color: #fff; border-color: #EB5E1A; }
 
     /* 搜索行 */
     #search-row { display: none; gap: 6px; align-items: center; }
@@ -63,7 +72,7 @@
       padding: 0 10px; font-size: 13px; outline: none; background: #fafafa;
     }
     #keyword:focus { border-color: #EB5E1A; background: #fff; }
-    .btn-search {
+    .btn-srch {
       height: 34px; padding: 0 14px;
       background: #EB5E1A; color: #fff; border: none; border-radius: 8px;
       font-size: 14px; cursor: pointer; font-weight: bold;
@@ -74,14 +83,13 @@
       cursor: pointer; color: #666;
     }
 
-    /* 搜索结果（两个列表） */
+    /* 搜索结果 */
     #result-list, #result-list-start {
       display: none; margin-top: 6px; max-height: 160px; overflow-y: auto;
       border-radius: 8px; border: 1px solid #f0f0f0; background: #fff;
     }
     .result-item {
-      padding: 8px 10px; border-bottom: 1px solid #f5f5f5;
-      cursor: pointer;
+      padding: 8px 10px; border-bottom: 1px solid #f5f5f5; cursor: pointer;
     }
     .result-item:last-child { border-bottom: none; }
     .result-item:active { background: #fff8f5; }
@@ -158,30 +166,30 @@
         <div class="dot end"></div>
       </div>
       <div class="input-group">
-        <div style="position:relative">
-          <input id="startInput" class="start-input" type="text" placeholder="点此设置起点" value="天安门广场"
-                 onclick="doSearchStart()" style="cursor:text;padding-right:32px">
-          <button id="searchStartBtn" onclick="doSearchStart()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#50E3C2;z-index:1;">✏️</button>
+        <!-- 起点行 -->
+        <div class="input-row start-row">
+          <input id="startInput" type="text" placeholder="点击这里设置起点" value="天安门广场">
+          <button class="btn-edit" id="btnStartEdit" title="编辑起点">✏️</button>
         </div>
-        <div style="position:relative">
-          <input id="endInput" type="text" placeholder="点此设置终点" value=""
-                 onclick="doSearchEnd()" style="cursor:text;padding-right:32px">
-          <button id="searchEndBtn" onclick="doSearchEnd()" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:13px;cursor:pointer;color:#EB5E1A;z-index:1;">✏️</button>
+        <!-- 终点行 -->
+        <div class="input-row">
+          <input id="endInput" type="text" placeholder="点击这里设置终点">
+          <button class="btn-edit" id="btnEndEdit" title="编辑终点">✏️</button>
         </div>
       </div>
-      <button class="swap-btn" id="swapBtn" title="互换起终点">⇅</button>
+      <button class="swap-btn" id="btnSwap" title="互换起终点">⇅</button>
     </div>
 
     <div id="route-tabs">
-      <button class="tab-btn active" data-type="driving" onclick="setRouteType('driving', this)">🚗 驾车</button>
-      <button class="tab-btn" data-type="walking" onclick="setRouteType('walking', this)">🚶 步行</button>
-      <button class="tab-btn" data-type="transit" onclick="setRouteType('transit', this)">🚌 公交</button>
+      <button class="tab-btn active" data-type="driving">🚗 驾车</button>
+      <button class="tab-btn" data-type="walking">🚶 步行</button>
+      <button class="tab-btn" data-type="transit">🚌 公交</button>
     </div>
 
     <div id="search-row">
       <input id="keyword" type="text" placeholder="输入地点名称，点下方搜索">
-      <button class="btn-search" onclick="doKeywordSearch()">搜索</button>
-      <button class="btn-cancel" onclick="cancelKeywordSearch()">取消</button>
+      <button class="btn-srch" id="btnDoSearch">搜索</button>
+      <button class="btn-cancel" id="btnCancelSearch">取消</button>
     </div>
 
     <div id="result-list"></div>
@@ -200,24 +208,26 @@
 
   <!-- 工具栏 -->
   <div id="toolbar">
-    <button class="tool-btn" id="trafficBtn" onclick="toggleTraffic()" title="实时路况">🚦</button>
-    <button class="tool-btn" onclick="resetView()" title="回到起点">🏠</button>
-    <button class="tool-btn" id="styleBtn" onclick="toggleMapStyle()" title="切换样式">🗺️</button>
+    <button class="tool-btn" id="trafficBtn" title="实时路况">🚦</button>
+    <button class="tool-btn" id="btnReset" title="回到起点">🏠</button>
+    <button class="tool-btn" id="btnStyle" title="切换样式">🗺️</button>
   </div>
 
   <!-- 定位按钮 -->
-  <button id="locBtn" onclick="locateMe()">📍</button>
+  <button id="locBtn">📍</button>
 
   <div id="debug">⏳ 正在加载地图...</div>
 
-  <!-- ========== 安全密钥 + 全局变量 + 工具函数 ========== -->
+  <!-- ============================================================
+       所有JS代码合并在一个 script 中，避免脚本加载顺序问题
+  ============================================================ -->
   <script>
-    // ====== 安全密钥（必须在加载地图JS之前）======
+    // ====== 1. 安全密钥（必须在加载地图JS之前）======
     window._AMapSecurityConfig = {
       securityJsCode: '24b4877388301846de3978ea560d6c25'
     };
 
-    // ====== 全局变量 ======
+    // ====== 2. 全局变量 ======
     var map = null;
     var markerStart = null;
     var markerEnd = null;
@@ -240,7 +250,7 @@
     var routeNames = { driving: '驾车', walking: '步行', transit: '公交' };
     var routeIcons = { driving: '🚗', walking: '🚶', transit: '🚌' };
 
-    // ====== 统一请求函数（XMLHttpRequest，兼容模拟机）======
+    // ====== 3. 统一XHR请求（兼容模拟机）======
     function xhrGet(url, onSuccess, onError) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', url, true);
@@ -248,15 +258,9 @@
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
           if (xhr.status === 200) {
-            try {
-              var json = JSON.parse(xhr.responseText);
-              onSuccess(json);
-            } catch(e) {
-              onError('JSON解析失败: ' + e.message);
-            }
-          } else {
-            onError('HTTP ' + xhr.status);
-          }
+            try { onSuccess(JSON.parse(xhr.responseText)); }
+            catch(e) { onError('JSON解析失败'); }
+          } else { onError('HTTP ' + xhr.status); }
         }
       };
       xhr.onerror = function() { onError('网络请求失败'); };
@@ -264,21 +268,18 @@
       xhr.send(null);
     }
 
-    // ====== 日志 ======
+    // ====== 4. 日志 ======
     function log(msg) {
       var d = document.getElementById('debug');
-      if (d) { d.innerHTML = msg; }
+      if (d) d.innerHTML = msg;
     }
 
-    // ====== 创建地图 ======
+    // ====== 5. 创建地图 ======
     function createMap() {
       try {
-        log('🗺️ 创建地图实例...');
+        log('🗺️ 创建地图...');
         map = new AMap.Map('container', {
-          zoom: 13,
-          center: currentPos,
-          resizeEnable: true,
-          viewMode: '2D'
+          zoom: 13, center: currentPos, resizeEnable: true, viewMode: '2D'
         });
 
         map.on('click', function(e) {
@@ -303,23 +304,20 @@
             log('✅ 地图就绪！请设置起终点');
           }
         }, 4000);
-
       } catch(e) {
         log('❌ 创建地图失败: ' + e.message);
       }
     }
 
-    // ====== 动态加载地图JS ======
+    // ====== 6. 动态加载地图JS ======
     function loadAMapScript(version) {
       log('📦 加载地图 v' + version + '...');
       var plugins = 'AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Transfer';
       var url = 'https://webapi.amap.com/maps?v=' + version +
-        '&key=' + JS_KEY +
-        '&plugin=' + plugins;
+        '&key=' + JS_KEY + '&plugin=' + plugins;
 
       var sc = document.createElement('script');
       sc.src = url;
-
       sc.onload = function() {
         log('📦 v' + version + ' 已下载');
         if (version === '2.0' && AMap.plugin) {
@@ -331,78 +329,35 @@
           createMap();
         }
       };
-
       sc.onerror = function() {
         if (version === '2.0') {
-          log('⚠️ v2.0 失败，降级到 v1.4.15...');
+          log('⚠️ v2.0失败，降级到 v1.4.15...');
           delete window._AMapSecurityConfig;
           loadAMapScript('1.4.15');
         } else {
           log('❌ 地图加载失败，请检查网络');
         }
       };
-
       document.head.appendChild(sc);
     }
 
-    // ====== 超时 ======
+    setTimeout(function() { if (!mapLoaded) log('⏳ 加载较慢...'); }, 10000);
     setTimeout(function() {
-      if (!mapLoaded) log('⏳ 加载较慢，请稍候...');
-    }, 10000);
-
-    setTimeout(function() {
-      if (!mapLoaded) log('❌ 超时 | <span onclick="location.reload()" style="color:#ff0;cursor:pointer">点此重试</span>');
+      if (!mapLoaded) log('❌ 超时 | <span id="retryBtn" style="color:#ff0;cursor:pointer">点此重试</span>');
     }, 25000);
 
-    // ====== 启动 ======
-    loadAMapScript('2.0');
-  </script>
+    // ====== 7. 业务函数 ======
 
-  <!-- ========== 功能函数 ========== -->
-  <script>
-    // ==================== 起点标记 ====================
     function renderStartMarker() {
       if (!map) return;
       if (markerStart) map.remove(markerStart);
       markerStart = new AMap.Marker({
-        position: currentPos,
-        map: map,
+        position: currentPos, map: map,
         content: '<div style="background:#50E3C2;width:14px;height:14px;border-radius:50%;border:3px solid #fff"></div>',
         offset: new AMap.Pixel(-7, -7)
       });
     }
 
-    // ==================== 互换起终点 ====================
-    document.getElementById('swapBtn').onclick = function() {
-      if (!currentDest) return;
-      var tmpLng = currentPos[0];
-      var tmpLat = currentPos[1];
-      currentPos = [currentDest.lng, currentDest.lat];
-      currentDest = { lng: tmpLng, lat: tmpLat, name: document.getElementById('startInput').value };
-      document.getElementById('startInput').value = currentDest.name;
-      document.getElementById('endInput').value = '地图选点';
-      renderStartMarker();
-      planRoute();
-    };
-
-    // ==================== 路线类型 ====================
-    function setRouteType(type, btn) {
-      currentRouteType = type;
-      var tabs = document.querySelectorAll('.tab-btn');
-      for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
-      btn.classList.add('active');
-      if (currentDest) planRoute();
-    }
-
-    // ==================== 设置终点 ====================
-    function setDestination(lng, lat, name) {
-      currentDest = { lng: lng, lat: lat, name: name };
-      document.getElementById('endInput').value = name;
-      document.getElementById('result-list').style.display = 'none';
-      planRoute();
-    }
-
-    // ==================== 设置起点 ====================
     function setStartPoint(lng, lat, name) {
       currentPos = [lng, lat];
       document.getElementById('startInput').value = name;
@@ -413,7 +368,13 @@
       log('✅ 起点: ' + name);
     }
 
-    // ==================== 搜索起点 ====================
+    function setDestination(lng, lat, name) {
+      currentDest = { lng: lng, lat: lat, name: name };
+      document.getElementById('endInput').value = name;
+      document.getElementById('result-list').style.display = 'none';
+      planRoute();
+    }
+
     function doSearchStart() {
       mapClickMode = 'start';
       var kw = document.getElementById('startInput').value.replace(/天安门广场|地图选点/g, '').replace(/^\s+|\s+$/, '');
@@ -422,7 +383,6 @@
       document.getElementById('result-list').style.display = 'none';
       document.getElementById('result-list-start').style.display = 'block';
       document.getElementById('search-row').style.display = 'flex';
-      // 自动聚焦到搜索框
       var kwi = document.getElementById('keyword');
       kwi.focus();
       kwi.select();
@@ -430,7 +390,6 @@
       log('🔍 搜索起点');
     }
 
-    // ==================== 搜索终点 ====================
     function doSearchEnd() {
       mapClickMode = 'end';
       var kw = document.getElementById('endInput').value.replace(/地图选点/g, '').replace(/^\s+|\s+$/, '');
@@ -446,7 +405,6 @@
       log('🔍 搜索终点');
     }
 
-    // ==================== 取消搜索 ====================
     function cancelKeywordSearch() {
       document.getElementById('search-row').style.display = 'none';
       document.getElementById('result-list').style.display = 'none';
@@ -455,61 +413,67 @@
       mapClickMode = 'end';
     }
 
-    // ==================== 关键词搜索（XHR版） ====================
     function doKeywordSearch() {
-      var keyword = document.getElementById('keyword').value.replace(/^\s+|\s+$/g, '');
+      var keyword = document.getElementById('keyword').value.replace(/^\s+|\s+$/, '');
       if (!keyword) { log('请输入关键词'); return; }
       log('🔍 搜索: ' + keyword);
-
       var url = 'https://restapi.amap.com/v3/place/text?key=' + WEB_KEY +
         '&keywords=' + encodeURIComponent(keyword) +
         '&city=北京&citylimit=false&offset=8&output=json';
-
       xhrGet(url, function(data) {
-          if (data.status === '1' && data.pois && data.pois.length > 0) {
-            log('✅ 找到' + data.pois.length + '个结果');
-            var html = '';
-            for (var i = 0; i < data.pois.length; i++) {
-              var poi = data.pois[i];
-              var coords = poi.location.split(',');
-              var distStr = '';
-              if (poi.distance) {
-                var d = parseInt(poi.distance);
-                distStr = d > 1000 ? (d / 1000).toFixed(1) + 'km' : d + 'm';
-              }
-              html += '<div class="result-item" onclick="onPoiSelect(\'' + coords[0] + '\',\'' + coords[1] + '\',\'' + poi.name.replace(/'/g, "\\'") + '\')">' +
-                '<div class="name">' + poi.name + '</div>' +
-                '<div class="addr">' + (poi.pname || '') + (poi.cityname || '') + (poi.adname || '') + '</div>' +
-                (distStr ? '<div class="dist">距起点约 ' + distStr + '</div>' : '') +
-              '</div>';
-            }
-            document.getElementById('result-list').innerHTML = html;
-            document.getElementById('result-list-start').innerHTML = html;
-          } else {
-            var notFound = '<div style="padding:10px;color:#999;font-size:13px">未找到"' + keyword + '"</div>';
-            document.getElementById('result-list').innerHTML = notFound;
-            document.getElementById('result-list-start').innerHTML = notFound;
-            log('未找到结果');
+        if (data.status === '1' && data.pois && data.pois.length > 0) {
+          log('✅ 找到' + data.pois.length + '个结果');
+          var html = '';
+          for (var i = 0; i < data.pois.length; i++) {
+            var poi = data.pois[i];
+            var coords = poi.location.split(',');
+            var d = poi.distance ? (parseInt(poi.distance) > 1000 ? (parseInt(poi.distance)/1000).toFixed(1) + 'km' : poi.distance + 'm') : '';
+            var safeName = poi.name.replace(/'/g, "\\'");
+            html += '<div class="result-item" data-lng="' + coords[0] + '" data-lat="' + coords[1] + '" data-name="' + safeName + '">' +
+              '<div class="name">' + poi.name + '</div>' +
+              '<div class="addr">' + (poi.pname || '') + (poi.cityname || '') + (poi.adname || '') + '</div>' +
+              (d ? '<div class="dist">距起点约 ' + d + '</div>' : '') +
+            '</div>';
           }
-        }, function(err) {
-          var errMsg = '<div style="padding:10px;color:#c00;font-size:13px">网络错误</div>';
-          document.getElementById('result-list').innerHTML = errMsg;
-          document.getElementById('result-list-start').innerHTML = errMsg;
-          log('网络错误: ' + err);
-        });
+          document.getElementById('result-list').innerHTML = html;
+          document.getElementById('result-list-start').innerHTML = html;
+          // 绑定结果点击（用属性委托，不用内联onclick）
+          bindResultItems();
+        } else {
+          var notFound = '<div style="padding:10px;color:#999;font-size:13px">未找到"' + keyword + '"</div>';
+          document.getElementById('result-list').innerHTML = notFound;
+          document.getElementById('result-list-start').innerHTML = notFound;
+          log('未找到结果');
+        }
+      }, function(err) {
+        var errMsg = '<div style="padding:10px;color:#c00;font-size:13px">网络错误</div>';
+        document.getElementById('result-list').innerHTML = errMsg;
+        document.getElementById('result-list-start').innerHTML = errMsg;
+        log('网络错误: ' + err);
+      });
     }
 
-    // ==================== POI点击 ====================
-    function onPoiSelect(lng, lat, name) {
-      if (mapClickMode === 'start') {
-        setStartPoint(parseFloat(lng), parseFloat(lat), name);
-      } else {
-        setDestination(parseFloat(lng), parseFloat(lat), name);
+    // 结果列表点击（事件委托，不用内联onclick）
+    function bindResultItems() {
+      var lists = [document.getElementById('result-list'), document.getElementById('result-list-start')];
+      for (var li = 0; li < lists.length; li++) {
+        var items = lists[li].getElementsByClassName('result-item');
+        for (var j = 0; j < items.length; j++) {
+          items[j].onclick = function() {
+            var lng = parseFloat(this.getAttribute('data-lng'));
+            var lat = parseFloat(this.getAttribute('data-lat'));
+            var name = this.getAttribute('data-name');
+            if (mapClickMode === 'start') {
+              setStartPoint(lng, lat, name);
+            } else {
+              setDestination(lng, lat, name);
+            }
+            cancelKeywordSearch();
+          };
+        }
       }
-      cancelKeywordSearch();
     }
 
-    // ==================== 路线规划（XHR版） ====================
     function planRoute() {
       if (!currentDest || !map) return;
       log('🧭 规划' + routeNames[currentRouteType] + '路线...');
@@ -517,8 +481,7 @@
 
       if (markerEnd) map.remove(markerEnd);
       markerEnd = new AMap.Marker({
-        position: [currentDest.lng, currentDest.lat],
-        map: map,
+        position: [currentDest.lng, currentDest.lat], map: map,
         content: '<div style="background:#EB5E1A;width:14px;height:14px;border-radius:50%;border:3px solid #fff"></div>',
         offset: new AMap.Pixel(-7, -7)
       });
@@ -526,45 +489,31 @@
       var originStr = currentPos[0] + ',' + currentPos[1];
       var destStr = currentDest.lng + ',' + currentDest.lat;
       var urlBase = 'https://restapi.amap.com/v3/direction/';
-
       var url = '';
       if (currentRouteType === 'driving') {
-        // strategy=0=推荐（综合考虑时间/距离/拥堵），extensions=all含实时路况
         url = urlBase + 'driving?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&strategy=0&extensions=all&output=json';
       } else if (currentRouteType === 'walking') {
-        // strategy=0=推荐
         url = urlBase + 'walking?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&strategy=0&output=json';
       } else if (currentRouteType === 'transit') {
-        // strategy=5=少换乘，city为出发城市名
         url = 'https://restapi.amap.com/v3/direction/transit/integrated?key=' + WEB_KEY +
           '&origin=' + originStr + '&destination=' + destStr +
           '&city=北京&cityd=北京&strategy=5&output=json';
       }
 
-      xhrGet(url, function(data) {
-          handleRoute(data, currentRouteType);
-        }, function(err) {
-          showRoutePanelError();
-          log('❌ 请求失败: ' + err);
-        });
+      xhrGet(url, function(data) { handleRoute(data, currentRouteType); },
+        function(err) { showRoutePanelError(); log('❌ 请求失败: ' + err); });
     }
 
-    // ==================== 处理路线结果 ====================
     function handleRoute(data, type) {
       if (!data) { showRoutePanelError(); log('❌ 无返回数据'); return; }
-
-      if (data.status !== '1') {
-        showRoutePanelError();
-        log('❌ ' + (data.info || 'API错误: ' + data.status));
-        return;
-      }
+      if (data.status !== '1') { showRoutePanelError(); log('❌ ' + (data.info || 'API错误')); return; }
 
       if (type === 'transit') {
         if (data.route && data.route.transits && data.route.transits.length > 0) {
           var transit = data.route.transits[0];
           showRoutePanel(transit, type);
           drawTransitRoute(transit);
-          log('✅ 公交: ' + (transit.distance / 1000).toFixed(1) + 'km, ' + Math.ceil(transit.duration / 60) + '分钟');
+          log('✅ 公交: ' + (transit.distance/1000).toFixed(1) + 'km, ' + Math.ceil(transit.duration/60) + '分钟');
         } else {
           showRoutePanelError();
           log('❌ 未找到公交路线(' + (data.info || '') + ')');
@@ -572,23 +521,19 @@
         return;
       }
 
-      // 驾车/步行
       if (data.route && data.route.paths && data.route.paths.length > 0) {
         var path = data.route.paths[0];
         showRoutePanel(path, type);
         drawRoutePath(path.steps);
-        log('✅ ' + routeNames[type] + ': ' + (path.distance / 1000).toFixed(1) + 'km, ' + Math.ceil(path.duration / 60) + '分钟');
+        log('✅ ' + routeNames[type] + ': ' + (path.distance/1000).toFixed(1) + 'km, ' + Math.ceil(path.duration/60) + '分钟');
       } else {
         showRoutePanelError();
         log('❌ 未找到路线');
       }
     }
 
-    // ==================== 绘制路线 ====================
     function drawRoutePath(steps) {
-      var path = [];
-      currentAllSteps = [];
-      var num = 1;
+      var path = []; currentAllSteps = []; var num = 1;
       for (var i = 0; i < steps.length; i++) {
         var step = steps[i];
         if (step.polyline) {
@@ -611,9 +556,7 @@
     }
 
     function drawTransitRoute(transit) {
-      var allPath = [];
-      currentAllSteps = [];
-      var segNum = 1;
+      var allPath = []; currentAllSteps = []; var segNum = 1;
       var segments = transit.segments || [];
       for (var i = 0; i < segments.length; i++) {
         var seg = segments[i];
@@ -657,16 +600,14 @@
       }
     }
 
-    // ==================== 路线面板 ====================
     function showRoutePanel(info, type) {
       var panel = document.getElementById('route-panel');
       panel.style.display = 'block';
       document.getElementById('rp-dest').textContent = currentDest.name;
-      var dist = info.distance > 1000 ? (info.distance / 1000).toFixed(1) + 'km' : (info.distance || 0) + 'm';
-      var time = Math.ceil((info.duration || 0) / 60) + '分钟';
+      var dist = info.distance > 1000 ? (info.distance/1000).toFixed(1) + 'km' : (info.distance || 0) + 'm';
+      var time = Math.ceil((info.duration || 0)/60) + '分钟';
       var cost = info.cost ? '，¥' + (typeof info.cost === 'number' ? info.cost.toFixed(1) : info.cost) : '';
-      document.getElementById('rp-summary').innerHTML =
-        routeIcons[type] + ' <span>' + dist + '</span> · <span>' + time + '</span>' + cost;
+      document.getElementById('rp-summary').innerHTML = routeIcons[type] + ' <span>' + dist + '</span> · <span>' + time + '</span>' + cost;
       renderSteps(currentAllSteps);
     }
 
@@ -680,11 +621,10 @@
 
     function renderSteps(steps) {
       var c = document.getElementById('rp-steps');
-      var html = '';
-      var maxShow = Math.min(steps.length, 12);
+      var html = ''; var maxShow = Math.min(steps.length, 12);
       for (var i = 0; i < maxShow; i++) {
         var s = steps[i];
-        var ds = s.distance > 1000 ? (s.distance / 1000).toFixed(1) + 'km' : (s.distance || 0) + 'm';
+        var ds = s.distance > 1000 ? (s.distance/1000).toFixed(1) + 'km' : (s.distance || 0) + 'm';
         var instr = (s.instruction || '').replace(/<[^>]+>/g, '');
         html += '<div class="rp-step">' +
           '<div class="step-icon">' + s.num + '</div>' +
@@ -699,7 +639,6 @@
       c.innerHTML = html;
     }
 
-    // ==================== 清除路线 ====================
     function clearRoute() {
       if (!map) return;
       if (routePolyline) { map.remove(routePolyline); routePolyline = null; }
@@ -708,7 +647,6 @@
       currentAllSteps = [];
     }
 
-    // ==================== 工具栏 ====================
     function resetView() {
       if (map) { map.setZoomAndCenter(14, currentPos); log('已回到起点'); }
     }
@@ -734,15 +672,11 @@
       if (!map) return;
       try {
         mapStyleIdx = (mapStyleIdx + 1) % mapStyles.length;
-        var styleUrl = 'amap://styles/' + mapStyles[mapStyleIdx];
-        map.setMapStyle(styleUrl);
+        map.setMapStyle('amap://styles/' + mapStyles[mapStyleIdx]);
         log('🗺️ 样式: ' + mapStyleNames[mapStyleIdx]);
-      } catch(e) {
-        log('⚠️ 样式切换失败(' + e.message + ')');
-      }
+      } catch(e) { log('⚠️ 样式切换失败(' + e.message + ')'); }
     }
 
-    // ==================== 定位（高德插件优先） ====================
     function locateMe() {
       log('📍 定位中...');
       if (map && typeof AMap !== 'undefined' && AMap.Geolocation) {
@@ -756,9 +690,7 @@
               renderStartMarker();
               document.getElementById('startInput').value = '我的位置';
               log('✅ 定位成功');
-            } else {
-              fallbackBrowserGeo();
-            }
+            } else { fallbackBrowserGeo(); }
           });
         } catch(e) { fallbackBrowserGeo(); }
       } else { fallbackBrowserGeo(); }
@@ -784,33 +716,63 @@
       }
     }
 
-    // ==================== 回车事件 ====================
-    document.addEventListener('DOMContentLoaded', function() {
-      var kwInput = document.getElementById('keyword');
-      if (kwInput) {
-        kwInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter') doKeywordSearch();
-        });
-      }
-      var endInput = document.getElementById('endInput');
-      if (endInput) {
-        endInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && this.value.replace(/^\s+|\s+$/, '')) {
-            document.getElementById('keyword').value = this.value.replace(/^\s+|\s+$/, '');
-            doSearchEnd();
-          }
-        });
-      }
-      var startInput = document.getElementById('startInput');
-      if (startInput) {
-        startInput.addEventListener('keypress', function(e) {
-          if (e.key === 'Enter' && this.value.replace(/^\s+|\s+$/, '')) {
-            document.getElementById('keyword').value = this.value.replace(/^\s+|\s+$/, '');
-            doSearchStart();
-          }
-        });
-      }
-    });
+    // ====== 8. 事件绑定（全部用JS addEventListener，不用HTML onclick）======
+    function bindAllEvents() {
+      // 起点编辑按钮
+      document.getElementById('btnStartEdit').onclick = function() { doSearchStart(); };
+      // 终点编辑按钮
+      document.getElementById('btnEndEdit').onclick = function() { doSearchEnd(); };
+      // 起点输入框点击
+      document.getElementById('startInput').onclick = function() { doSearchStart(); };
+      // 终点输入框点击
+      document.getElementById('endInput').onclick = function() { doSearchEnd(); };
+      // 互换按钮
+      document.getElementById('btnSwap').onclick = function() {
+        if (!currentDest) return;
+        var tmpLng = currentPos[0], tmpLat = currentPos[1];
+        currentPos = [currentDest.lng, currentDest.lat];
+        currentDest = { lng: tmpLng, lat: tmpLat, name: document.getElementById('startInput').value };
+        document.getElementById('startInput').value = currentDest.name;
+        document.getElementById('endInput').value = '地图选点';
+        renderStartMarker();
+        planRoute();
+      };
+      // 路线Tab点击（事件委托）
+      var tabsEl = document.getElementById('route-tabs');
+      tabsEl.onclick = function(e) {
+        var btn = e.target;
+        if (btn.className.indexOf('tab-btn') === -1) return;
+        var type = btn.getAttribute('data-type');
+        currentRouteType = type;
+        var allTabs = tabsEl.getElementsByClassName('tab-btn');
+        for (var i = 0; i < allTabs.length; i++) allTabs[i].classList.remove('active');
+        btn.classList.add('active');
+        if (currentDest) planRoute();
+        log('已切换到' + routeNames[type]);
+      };
+      // 搜索按钮
+      document.getElementById('btnDoSearch').onclick = function() { doKeywordSearch(); };
+      // 取消按钮
+      document.getElementById('btnCancelSearch').onclick = function() { cancelKeywordSearch(); };
+      // 关键词回车
+      document.getElementById('keyword').onkeypress = function(e) {
+        if (e.key === 'Enter') doKeywordSearch();
+      };
+      // 工具栏
+      document.getElementById('trafficBtn').onclick = function() { toggleTraffic(); };
+      document.getElementById('btnReset').onclick = function() { resetView(); };
+      document.getElementById('btnStyle').onclick = function() { toggleMapStyle(); };
+      // 定位
+      document.getElementById('locBtn').onclick = function() { locateMe(); };
+      // 重试
+      document.getElementById('debug').onclick = function(e) {
+        if (e.target.id === 'retryBtn') location.reload();
+      };
+    }
+
+    // ====== 9. 启动 ======
+    bindAllEvents();
+    loadAMapScript('2.0');
   </script>
 </body>
 </html>
