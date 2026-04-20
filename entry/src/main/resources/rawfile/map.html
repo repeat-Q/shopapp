@@ -716,18 +716,33 @@
       }
     }
 
-    // ====== 8. 事件绑定（全部用JS addEventListener，不用HTML onclick）======
+    // ====== 8. 事件绑定（全部用DOMContentLoaded包裹，不用HTML onclick）======
     function bindAllEvents() {
+      log('🔗 开始绑定事件...');
+
       // 起点编辑按钮
-      document.getElementById('btnStartEdit').onclick = function() { doSearchStart(); };
+      var btnStart = document.getElementById('btnStartEdit');
+      if (btnStart) btnStart.onclick = function() { log('⚡ 点击了起点按钮'); doSearchStart(); };
+      else log('❌ 找不到btnStartEdit');
+
       // 终点编辑按钮
-      document.getElementById('btnEndEdit').onclick = function() { doSearchEnd(); };
+      var btnEnd = document.getElementById('btnEndEdit');
+      if (btnEnd) btnEnd.onclick = function() { log('⚡ 点击了终点按钮'); doSearchEnd(); };
+      else log('❌ 找不到btnEndEdit');
+
       // 起点输入框点击
-      document.getElementById('startInput').onclick = function() { doSearchStart(); };
+      var si = document.getElementById('startInput');
+      if (si) si.onclick = function() { log('⚡ 点击了起点输入框'); doSearchStart(); };
+      else log('❌ 找不到startInput');
+
       // 终点输入框点击
-      document.getElementById('endInput').onclick = function() { doSearchEnd(); };
+      var ei = document.getElementById('endInput');
+      if (ei) ei.onclick = function() { log('⚡ 点击了终点输入框'); doSearchEnd(); };
+      else log('❌ 找不到endInput');
+
       // 互换按钮
-      document.getElementById('btnSwap').onclick = function() {
+      var swapBtn = document.getElementById('btnSwap');
+      if (swapBtn) swapBtn.onclick = function() {
         if (!currentDest) return;
         var tmpLng = currentPos[0], tmpLat = currentPos[1];
         currentPos = [currentDest.lng, currentDest.lat];
@@ -736,43 +751,73 @@
         document.getElementById('endInput').value = '地图选点';
         renderStartMarker();
         planRoute();
+        log('已互换起终点');
       };
-      // 路线Tab点击（事件委托）
+
+      // 路线Tab（用addEventListener，更可靠）
       var tabsEl = document.getElementById('route-tabs');
-      tabsEl.onclick = function(e) {
-        var btn = e.target;
-        if (btn.className.indexOf('tab-btn') === -1) return;
-        var type = btn.getAttribute('data-type');
-        currentRouteType = type;
-        var allTabs = tabsEl.getElementsByClassName('tab-btn');
-        for (var i = 0; i < allTabs.length; i++) allTabs[i].classList.remove('active');
-        btn.classList.add('active');
-        if (currentDest) planRoute();
-        log('已切换到' + routeNames[type]);
-      };
-      // 搜索按钮
-      document.getElementById('btnDoSearch').onclick = function() { doKeywordSearch(); };
-      // 取消按钮
-      document.getElementById('btnCancelSearch').onclick = function() { cancelKeywordSearch(); };
+      if (tabsEl) {
+        tabsEl.addEventListener('click', function(e) {
+          var btn = e.target;
+          if (!btn || btn.className.indexOf('tab-btn') === -1) return;
+          var type = btn.getAttribute('data-type');
+          currentRouteType = type;
+          var allTabs = tabsEl.getElementsByClassName('tab-btn');
+          for (var i = 0; i < allTabs.length; i++) allTabs[i].classList.remove('active');
+          btn.classList.add('active');
+          if (currentDest) planRoute();
+          log('已切换到' + routeNames[type]);
+        });
+      }
+
+      // 搜索/取消按钮
+      var btnSrch = document.getElementById('btnDoSearch');
+      if (btnSrch) btnSrch.onclick = function() { log('⚡ 点击了搜索'); doKeywordSearch(); };
+
+      var btnCancel = document.getElementById('btnCancelSearch');
+      if (btnCancel) btnCancel.onclick = function() { cancelKeywordSearch(); log('已取消搜索'); };
+
       // 关键词回车
-      document.getElementById('keyword').onkeypress = function(e) {
-        if (e.key === 'Enter') doKeywordSearch();
-      };
+      var kwInput = document.getElementById('keyword');
+      if (kwInput) kwInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { log('⚡ 回车搜索'); doKeywordSearch(); }
+      });
+
       // 工具栏
-      document.getElementById('trafficBtn').onclick = function() { toggleTraffic(); };
-      document.getElementById('btnReset').onclick = function() { resetView(); };
-      document.getElementById('btnStyle').onclick = function() { toggleMapStyle(); };
+      var tb = document.getElementById('trafficBtn');
+      if (tb) tb.onclick = function() { toggleTraffic(); };
+      var br = document.getElementById('btnReset');
+      if (br) br.onclick = function() { resetView(); };
+      var bs = document.getElementById('btnStyle');
+      if (bs) bs.onclick = function() { toggleMapStyle(); };
+
       // 定位
-      document.getElementById('locBtn').onclick = function() { locateMe(); };
+      var lb = document.getElementById('locBtn');
+      if (lb) lb.onclick = function() { locateMe(); };
+
       // 重试
-      document.getElementById('debug').onclick = function(e) {
+      var db = document.getElementById('debug');
+      if (db) db.onclick = function(e) {
         if (e.target.id === 'retryBtn') location.reload();
       };
+
+      log('✅ 事件绑定完成，共绑定了' +
+        (btnStart?1:0) + (btnEnd?1:0) + (si?1:0) + (ei?1:0) +
+        (swapBtn?1:0) + (tabsEl?1:0) + (btnSrch?1:0) + (btnCancel?1:0) +
+        (kwInput?1:0) + (tb?1:0) + (br?1:0) + (bs?1:0) + (lb?1:0) + (db?1:0) + '个元素');
     }
 
-    // ====== 9. 启动 ======
-    bindAllEvents();
-    loadAMapScript('2.0');
+    // ====== 9. 启动（等DOM就绪）======
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        bindAllEvents();
+        loadAMapScript('2.0');
+      });
+    } else {
+      // DOM已经就绪
+      bindAllEvents();
+      loadAMapScript('2.0');
+    }
   </script>
 </body>
 </html>
