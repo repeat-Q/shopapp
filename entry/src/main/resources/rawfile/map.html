@@ -9,120 +9,76 @@
     html, body { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; }
     #container { width: 100%; height: 100%; }
 
-    /* === 顶部搜索面板 === */
+    /* 顶部搜索面板 */
     #search-panel {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 999;
-      background: white;
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 999; background: white;
       border-radius: 0 0 16px 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.10);
       padding: 12px 14px 10px;
     }
 
-    /* 起终点输入区 */
+    /* 起终点输入 */
     #route-inputs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
     }
-    .dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
     .dot.start { background: #50E3C2; box-shadow: 0 0 6px rgba(80,227,194,0.5); }
     .dot.end { background: #EB5E1A; box-shadow: 0 0 6px rgba(235,94,26,0.4); }
-    .route-line {
-      width: 10px; height: 22px;
-      border-left: 2px dashed #ddd;
-      margin-left: 4px;
-      margin-bottom: 2px;
-    }
+    .route-line { width: 10px; height: 22px; border-left: 2px dashed #ddd; margin-left: 4px; margin-bottom: 2px; }
     .input-group { flex: 1; }
     .input-group input {
-      width: 100%; height: 34px;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 0 10px;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      background: #fafafa;
-      margin-bottom: 4px;
-      display: block;
+      width: 100%; height: 34px; border: 1px solid #e8e8e8;
+      border-radius: 8px; padding: 0 10px; font-size: 13px;
+      outline: none; background: #fafafa; margin-bottom: 4px; display: block;
     }
     .input-group input:last-child { margin-bottom: 0; }
     .input-group input.start-input { background: #f0fdf9; border-color: #bbf7d0; }
     .input-group input:focus { border-color: #EB5E1A; background: white; }
     .input-group input.start-input:focus { border-color: #50E3C2; }
     .swap-btn {
-      width: 28px; height: 28px;
-      border: none; background: #f5f5f5;
-      border-radius: 50%; cursor: pointer;
-      font-size: 14px;
+      width: 28px; height: 28px; border: none; background: #f5f5f5;
+      border-radius: 50%; cursor: pointer; font-size: 14px;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; transition: all 0.2s;
     }
     .swap-btn:hover { background: #e0e0e0; transform: rotate(180deg); }
 
     /* 路线Tab */
-    #route-tabs {
-      display: flex;
-      gap: 5px;
-      margin-bottom: 6px;
-    }
+    #route-tabs { display: flex; gap: 5px; margin-bottom: 6px; }
     .tab-btn {
-      flex: 1; height: 30px;
-      border: none; background: #f5f5f5;
-      border-radius: 6px;
-      font-size: 12px; cursor: pointer;
+      flex: 1; height: 30px; border: none; background: #f5f5f5;
+      border-radius: 6px; font-size: 12px; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      gap: 4px; color: #666;
-      font-weight: 500; transition: all 0.2s;
+      gap: 4px; color: #666; font-weight: 500; transition: all 0.2s;
     }
     .tab-btn.active {
       background: linear-gradient(135deg, #EB5E1A, #FF7A3D);
-      color: white;
-      box-shadow: 0 2px 8px rgba(235,94,26,0.30);
+      color: white; box-shadow: 0 2px 8px rgba(235,94,26,0.30);
     }
 
     /* 搜索行 */
-    #search-row {
-      display: flex; gap: 6px; align-items: center;
-    }
+    #search-row { display: flex; gap: 6px; align-items: center; }
     #keyword {
-      flex: 1; height: 34px;
-      border: 1px solid #e8e8e8;
-      border-radius: 8px;
-      padding: 0 10px;
-      font-size: 13px; outline: none;
-      background: #fafafa;
+      flex: 1; height: 34px; border: 1px solid #e8e8e8; border-radius: 8px;
+      padding: 0 10px; font-size: 13px; outline: none; background: #fafafa;
     }
     #keyword:focus { border-color: #EB5E1A; background: white; }
     #searchBtn {
       height: 34px; padding: 0 14px;
       background: linear-gradient(135deg, #EB5E1A, #FF7A3D);
-      color: white; border: none;
-      border-radius: 8px; font-size: 14px;
+      color: white; border: none; border-radius: 8px; font-size: 14px;
       cursor: pointer; font-weight: bold;
       box-shadow: 0 2px 8px rgba(235,94,26,0.30);
     }
 
     /* 搜索结果 */
     #result-list {
-      margin-top: 6px;
-      max-height: 160px;
-      overflow-y: auto;
-      display: none;
-      border-radius: 8px;
-      border: 1px solid #f0f0f0;
-      background: white;
+      margin-top: 6px; max-height: 160px; overflow-y: auto;
+      display: none; border-radius: 8px; border: 1px solid #f0f0f0; background: white;
     }
     .result-item {
-      padding: 8px 10px;
-      border-bottom: 1px solid #f5f5f5;
+      padding: 8px 10px; border-bottom: 1px solid #f5f5f5;
       cursor: pointer; transition: background 0.15s;
     }
     .result-item:last-child { border-bottom: none; }
@@ -131,108 +87,63 @@
     .result-item .addr { font-size: 12px; color: #999; margin-top: 2px; }
     .result-item .dist { font-size: 11px; color: #EB5E1A; margin-top: 2px; font-weight: 500; }
 
-    /* === 底部路线详情面板 === */
+    /* 底部路线面板 */
     #route-panel {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 998;
-      background: white;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      z-index: 998; background: white;
       border-radius: 16px 16px 0 0;
       box-shadow: 0 -4px 24px rgba(0,0,0,0.14);
-      display: none;
-      max-height: 45%;
-      overflow-y: auto;
+      display: none; max-height: 45%; overflow-y: auto;
       padding-bottom: env(safe-area-inset-bottom, 10px);
     }
-    .rp-handle {
-      width: 36px; height: 4px;
-      background: #ddd; border-radius: 2px;
-      margin: 10px auto 8px;
-    }
-    .rp-header {
-      padding: 0 16px 10px;
-      border-bottom: 1px solid #f0f0f0;
-    }
+    .rp-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 10px auto 8px; }
+    .rp-header { padding: 0 16px 10px; border-bottom: 1px solid #f0f0f0; }
     .rp-dest { font-size: 16px; font-weight: bold; color: #333; }
-    .rp-summary {
-      font-size: 13px; color: #666;
-      margin-top: 4px;
-      display: flex; gap: 12px; flex-wrap: wrap;
-    }
+    .rp-summary { font-size: 13px; color: #666; margin-top: 4px; display: flex; gap: 12px; flex-wrap: wrap; }
     .rp-summary span { color: #EB5E1A; font-weight: bold; }
-
-    /* 路线步骤 */
     .rp-steps { padding: 4px 16px 10px; }
-    .rp-step {
-      display: flex; gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px dashed #f0f0f0;
-    }
+    .rp-step { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px dashed #f0f0f0; }
     .rp-step:last-child { border-bottom: none; }
     .step-icon {
-      width: 22px; height: 22px;
-      border-radius: 50%;
-      background: #EB5E1A;
-      color: white;
-      font-size: 11px; font-weight: bold;
+      width: 22px; height: 22px; border-radius: 50%; background: #EB5E1A;
+      color: white; font-size: 11px; font-weight: bold;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0; margin-top: 1px;
     }
     .step-text { font-size: 13px; color: #333; line-height: 1.5; }
     .step-dist { font-size: 11px; color: #999; margin-top: 2px; }
-    .step-road { font-size: 12px; color: #666; margin-top: 2px; padding-left: 0; }
+    .step-road { font-size: 12px; color: #666; margin-top: 2px; }
 
     /* 工具栏 */
-    #toolbar {
-      position: fixed; right: 12px;
-      bottom: 80px;
-      display: flex; flex-direction: column;
-      gap: 8px; z-index: 999;
-    }
+    #toolbar { position: fixed; right: 12px; bottom: 80px; display: flex; flex-direction: column; gap: 8px; z-index: 999; }
     .tool-btn {
-      width: 40px; height: 40px;
-      background: white; border: none;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+      width: 40px; height: 40px; background: white; border: none;
+      border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.14);
       cursor: pointer; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
     .tool-btn:hover { background: #f5f5f5; transform: scale(1.05); }
     .tool-btn.active { background: #EB5E1A; color: white; }
 
     /* 定位按钮 */
     #locBtn {
-      position: fixed; right: 12px; bottom: 228px;
-      width: 44px; height: 44px;
-      background: white; border: none;
-      border-radius: 50%;
+      position: fixed; right: 12px; bottom: 228px; width: 44px; height: 44px;
+      background: white; border: none; border-radius: 50%;
       box-shadow: 0 2px 12px rgba(0,0,0,0.18);
       cursor: pointer; font-size: 20px;
-      display: flex; align-items: center; justify-content: center;
-      z-index: 999;
+      display: flex; align-items: center; justify-content: center; z-index: 999;
     }
     #locBtn:active { transform: scale(0.95); }
 
     /* 调试 */
     #debug {
       position: fixed; bottom: 8px; left: 8px;
-      background: rgba(0,0,0,0.55);
-      color: #0f0; font-size: 10px;
-      padding: 4px 8px; border-radius: 4px;
-      z-index: 9999; max-width: 65%;
-      opacity: 0.7;
+      background: rgba(0,0,0,0.55); color: #0f0; font-size: 10px;
+      padding: 4px 8px; border-radius: 4px; z-index: 9999; max-width: 65%; opacity: 0.7;
     }
 
-    /* 加载动画 */
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .loading { display: inline-block; animation: spin 0.8s linear infinite; }
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-    .pulse { animation: pulse 2s ease-in-out infinite; }
-
-    /* 公交步骤特殊样式 */
-    .bus-step { border-left: 3px solid #EB5E1A; padding-left: 8px; margin-left: 4px; }
-    .walk-step { border-left: 3px solid #50E3C2; padding-left: 8px; margin-left: 4px; }
   </style>
 </head>
 <body>
@@ -290,7 +201,10 @@
   <!-- 定位按钮 -->
   <button id="locBtn" onclick="locateMe()">📍</button>
 
-  <div id="debug">初始化中...</div>
+  <div id="debug">地图加载中...</div>
+
+  <!-- 高德地图 v1.4.15 (callback方式，最稳定) -->
+  <script src="https://webapi.amap.com/maps?v=1.4.15&key=3a5628188e4853dcff3425f59058a32b&callback=onAMapReady"></script>
 
   <script>
     // ==================== 全局变量 ====================
@@ -300,58 +214,28 @@
     var routePolyline = null;
     var routeCopyLine = null;
     var trafficLayer = null;
-    var currentPos = [116.397428, 39.90923];   // 天安门
+    var currentPos = [116.397428, 39.90923];
     var currentDest = null;
     var currentRouteType = 'driving';
     var currentAllSteps = [];
     var mapStyleIdx = 0;
-    var mapStyles = [
-      'amap://styles/normal',
-      'amap://styles/light',
-      'amap://styles/dark',
-      'amap://styles/fresh'
-    ];
+    var mapStyles = ['normal', 'light', 'dark', 'fresh'];
     var mapStyleNames = ['默认', '浅色', '深色', '马卡龙'];
+    var mapLoaded = false;
+    var trafficOn = false;
 
-    // API Key
-    var JS_KEY = '3a5628188e4853dcff3425f59058a32b';
+    // API Key (Web服务Key用于REST API)
     var WEB_KEY = '5c4aff1e82b1c39bd6733d6146fa9caa';
-
-    // 路线类型中文名
-    var routeTypeNames = {
-      driving: '驾车',
-      walking: '步行',
-      riding: '骑行',
-      transit: '公交'
-    };
-
-    var routeTypeIcons = {
-      driving: '🚗',
-      walking: '🚶',
-      riding: '🚲',
-      transit: '🚌'
-    };
 
     // ==================== 日志 ====================
     function log(msg) {
       var d = document.getElementById('debug');
-      if (d) {
-        d.innerHTML = msg;
-      }
+      if (d) d.innerHTML = msg;
     }
 
-    // ==================== 初始化地图 ====================
-    function loadAMap() {
-      log('加载高德地图...');
-      var sc = document.createElement('script');
-      sc.src = 'https://webapi.amap.com/maps?v=2.0&key=' + JS_KEY + '&plugin=AMap.PlaceSearch';
-      sc.onerror = function() { log('地图加载失败，请检查网络'); };
-      sc.onload = function() { initMap(); };
-      document.head.appendChild(sc);
-    }
-
-    function initMap() {
-      log('初始化中...');
+    // ==================== 地图初始化回调 (通过callback参数调用) ====================
+    function onAMapReady() {
+      log('地图引擎就绪，初始化中...');
       try {
         map = new AMap.Map('container', {
           zoom: 13,
@@ -362,18 +246,24 @@
 
         // 地图点击设为终点
         map.on('click', function(e) {
-          var lng = e.lnglat.getLng();
-          var lat = e.lnglat.getLat();
           document.getElementById('endInput').value = '地图选点';
-          setDestination(lng, lat, '地图选点');
+          setDestination(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
         });
 
+        mapLoaded = true;
         renderStartMarker();
-        log('就绪 | 搜索或点击地图选终点');
+        log('✅ 就绪 | 搜索或点击地图选终点');
       } catch(e) {
-        log('错误: ' + e.message);
+        log('❌ 初始化错误: ' + e.message);
       }
     }
+
+    // 超时检测（地图3秒内未加载则报错）
+    setTimeout(function() {
+      if (!mapLoaded) {
+        log('❌ 地图加载超时，请检查网络');
+      }
+    }, 8000);
 
     // ==================== 起点标记 ====================
     function renderStartMarker() {
@@ -410,16 +300,14 @@
     // ==================== 设置终点 ====================
     function setDestination(lng, lat, name) {
       currentDest = { lng: lng, lat: lat, name: name };
+      document.getElementById('endInput').value = name;
       planRoute();
     }
 
     // ==================== 搜索 ====================
     function doSearch() {
       var keyword = document.getElementById('keyword').value.trim();
-      if (!keyword) {
-        log('请输入搜索关键词');
-        return;
-      }
+      if (!keyword) { log('请输入关键词'); return; }
       log('搜索: ' + keyword);
 
       var list = document.getElementById('result-list');
@@ -435,7 +323,7 @@
         .then(function(data) {
           list.innerHTML = '';
           if (data.status === '1' && data.pois && data.pois.length > 0) {
-            log('找到 ' + data.pois.length + ' 个结果');
+            log('✅ 找到' + data.pois.length + '个结果');
             data.pois.forEach(function(poi) {
               var coords = poi.location.split(',');
               var distStr = poi.distance ? (parseInt(poi.distance) > 1000
@@ -445,20 +333,19 @@
               item.className = 'result-item';
               item.innerHTML =
                 '<div class="name">' + poi.name + '</div>' +
-                '<div class="addr">' + (poi.pname || '') + (poi.cityname || '') + (poi.adname || '') + ' ' + (poi.address || '') + '</div>' +
+                '<div class="addr">' + (poi.pname || '') + (poi.cityname || '') + (poi.adname || '') + '</div>' +
                 (distStr ? '<div class="dist">距起点约 ' + distStr + '</div>' : '');
               item.onclick = (function(c, n) {
                 return function() {
                   list.style.display = 'none';
                   document.getElementById('keyword').value = '';
                   setDestination(parseFloat(c[0]), parseFloat(c[1]), n);
-                  document.getElementById('endInput').value = n;
                 };
               })(coords, poi.name));
               list.appendChild(item);
             });
           } else {
-            list.innerHTML = '<div style="padding:10px;color:#999;font-size:13px">未找到 "' + keyword + '"</div>';
+            list.innerHTML = '<div style="padding:10px;color:#999;font-size:13px">未找到"' + keyword + '"</div>';
             log('未找到结果');
           }
         })
@@ -471,10 +358,9 @@
     // ==================== 路线规划 ====================
     function planRoute() {
       if (!currentDest || !map) return;
-      log('规划' + routeTypeNames[currentRouteType] + '路线...');
+      log('规划' + routeNames[currentRouteType] + '路线...');
       clearRoute();
 
-      // 目的地标记
       markerEnd = new AMap.Marker({
         position: [currentDest.lng, currentDest.lat],
         map: map,
@@ -484,105 +370,71 @@
 
       var originStr = currentPos[0] + ',' + currentPos[1];
       var destStr = currentDest.lng + ',' + currentDest.lat;
+      var urlBase = 'https://restapi.amap.com/v3/direction/';
 
-      if (currentRouteType === 'driving') {
-        fetch('https://restapi.amap.com/v3/direction/driving?key=' + WEB_KEY +
-          '&origin=' + originStr + '&destination=' + destStr +
-          '&extensions=base&output=json')
-          .then(function(r) { return r.json(); })
-          .then(function(data) { handleRouteResult(data, 'driving'); });
-      } else if (currentRouteType === 'walking') {
-        fetch('https://restapi.amap.com/v3/direction/walking?key=' + WEB_KEY +
-          '&origin=' + originStr + '&destination=' + destStr + '&output=json')
-          .then(function(r) { return r.json(); })
-          .then(function(data) { handleRouteResult(data, 'walking'); });
-      } else if (currentRouteType === 'riding') {
-        fetch('https://restapi.amap.com/v3/direction/bicycling?key=' + WEB_KEY +
-          '&origin=' + originStr + '&destination=' + destStr + '&output=json')
-          .then(function(r) { return r.json(); })
-          .then(function(data) { handleRouteResult(data, 'riding'); });
-      } else if (currentRouteType === 'transit') {
-        fetch('https://restapi.amap.com/v3/direction/transit/integrated?key=' + WEB_KEY +
-          '&origin=' + originStr + '&destination=' + destStr +
-          '&city=beijing&cityd=beijing&strategy=0&output=json')
-          .then(function(r) { return r.json(); })
-          .then(function(data) { handleRouteResult(data, 'transit'); });
-      }
+      var urls = {
+        driving: urlBase + 'driving?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&extensions=base&output=json',
+        walking: urlBase + 'walking?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&output=json',
+        riding: urlBase + 'bicycling?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&output=json',
+        transit: 'https://restapi.amap.com/v3/direction/transit/integrated?key=' + WEB_KEY + '&origin=' + originStr + '&destination=' + destStr + '&city=beijing&cityd=beijing&strategy=0&output=json'
+      };
+
+      fetch(urls[currentRouteType])
+        .then(function(r) { return r.json(); })
+        .then(function(data) { handleRoute(data, currentRouteType); })
+        .catch(function(e) { log('❌ 请求失败: ' + e.message); });
     }
 
+    var routeNames = { driving: '驾车', walking: '步行', riding: '骑行', transit: '公交' };
+    var routeIcons = { driving: '🚗', walking: '🚶', riding: '🚲', transit: '🚌' };
+
     // ==================== 处理路线结果 ====================
-    function handleRouteResult(data, type) {
+    function handleRoute(data, type) {
       if (data.status === '1') {
         if (type === 'transit') {
-          // 公交
           if (data.route && data.route.transits && data.route.transits.length > 0) {
             var transit = data.route.transits[0];
             showRoutePanel(transit, type);
             drawTransitRoute(transit);
-            log('公交: ' + (transit.distance/1000).toFixed(1) + 'km, ' + Math.ceil(transit.duration/60) + '分钟');
+            log('✅ 公交: ' + (transit.distance/1000).toFixed(1) + 'km, ' + Math.ceil(transit.duration/60) + '分钟');
           } else {
-            log('未找到公交路线');
             showRoutePanelError();
+            log('未找到公交路线');
           }
         } else {
-          // 驾车/步行/骑行
           if (data.route && data.route.paths && data.route.paths.length > 0) {
             var path = data.route.paths[0];
             showRoutePanel(path, type);
-            drawPolylineRoute(path.steps);
-            log(routeTypeNames[type] + ': ' + (path.distance/1000).toFixed(1) + 'km, ' + Math.ceil(path.duration/60) + '分钟');
+            drawRoutePath(path.steps);
+            log('✅ ' + routeNames[type] + ': ' + (path.distance/1000).toFixed(1) + 'km, ' + Math.ceil(path.duration/60) + '分钟');
           } else {
-            log('未找到路线: ' + (data.info || ''));
             showRoutePanelError();
+            log('未找到路线');
           }
         }
       } else {
-        log('API错误: ' + (data.info || '未知错误'));
         showRoutePanelError();
+        log('❌ ' + (data.info || 'API错误'));
       }
     }
 
     // ==================== 绘制驾车/步行/骑行路线 ====================
-    function drawPolylineRoute(steps) {
+    function drawRoutePath(steps) {
       var path = [];
       currentAllSteps = [];
-      var stepNum = 1;
-
+      var num = 1;
       steps.forEach(function(step) {
         if (step.polyline) {
           step.polyline.split(';').forEach(function(p) {
             var c = p.split(',');
-            if (c.length >= 2) {
-              path.push([parseFloat(c[0]), parseFloat(c[1])]);
-            }
+            if (c.length >= 2) path.push([parseFloat(c[0]), parseFloat(c[1])]);
           });
         }
-        currentAllSteps.push({
-          num: stepNum++,
-          instruction: step.instruction,
-          road: step.road || '',
-          distance: step.distance,
-          type: 'normal'
-        });
+        currentAllSteps.push({ num: num++, instruction: step.instruction, road: step.road || '', distance: step.distance });
       });
-
       if (path.length > 1) {
-        // 外层浅色线（描边效果）
-        routeCopyLine = new AMap.Polyline({
-          path: path,
-          strokeColor: '#FFB088',
-          strokeWeight: 10,
-          strokeOpacity: 0.3,
-          lineJoin: 'round'
-        });
-        // 主体彩色线
-        routePolyline = new AMap.Polyline({
-          path: path,
-          strokeColor: '#EB5E1A',
-          strokeWeight: 5,
-          strokeOpacity: 0.9,
-          lineJoin: 'round'
-        });
+        routeCopyLine = new AMap.Polyline({ path: path, strokeColor: '#FFB088', strokeWeight: 10, strokeOpacity: 0.3, lineJoin: 'round' });
+        routePolyline = new AMap.Polyline({ path: path, strokeColor: '#EB5E1A', strokeWeight: 5, strokeOpacity: 0.9, lineJoin: 'round' });
         map.add([routeCopyLine, routePolyline]);
         map.setFitView([routePolyline]);
       }
@@ -593,12 +445,8 @@
       var allPath = [];
       currentAllSteps = [];
       var segNum = 1;
-
       transit.segments.forEach(function(seg) {
-        var stepType = 'normal';
-        var stepLabel = segNum + '';
-
-        // 步行段
+        var busName = seg.buslines && seg.buslines[0] ? seg.buslines[0].name : '';
         if (seg.walking && seg.walking.steps) {
           seg.walking.steps.forEach(function(s) {
             if (s.polyline) {
@@ -608,27 +456,10 @@
               });
             }
           });
-          if (segNum === 1) {
-            currentAllSteps.push({
-              num: stepLabel,
-              instruction: s.instruction || '步行出发',
-              road: '',
-              distance: seg.walking.distance || 0,
-              type: 'walk'
-            });
-          }
         }
-
-        // 公交换乘段
-        if (seg.buslines && seg.buslines.length > 0) {
+        if (seg.buslines) {
           seg.buslines.forEach(function(bl) {
-            currentAllSteps.push({
-              num: stepLabel,
-              instruction: '乘坐 ' + (bl.name || '').replace(/\s/g, ''),
-              road: bl.name || '',
-              distance: seg.distance || 0,
-              type: 'bus'
-            });
+            currentAllSteps.push({ num: segNum, instruction: '乘坐 ' + (bl.name || '').replace(/\s/g, ''), road: '', distance: seg.distance || 0 });
             if (bl.path) {
               bl.path.split(';').forEach(function(p) {
                 var c = p.split(',');
@@ -636,53 +467,29 @@
               });
             }
           });
+        } else if (segNum === 1 && seg.walking && seg.walking.steps) {
+          var last = seg.walking.steps[seg.walking.steps.length - 1];
+          if (last) currentAllSteps.push({ num: segNum, instruction: last.instruction || '步行', road: '', distance: seg.walking.distance || 0 });
         }
-
-        // 出站步行
-        if (seg.walking && seg.walking.steps && segNum > 1) {
-          var lastStep = seg.walking.steps[seg.walking.steps.length - 1];
-          if (lastStep) {
-            currentAllSteps.push({
-              num: '→',
-              instruction: lastStep.instruction || '步行到达',
-              road: '',
-              distance: seg.walking.distance || 0,
-              type: 'walk'
-            });
-          }
-        }
-
         segNum++;
       });
-
       if (allPath.length > 1) {
-        routePolyline = new AMap.Polyline({
-          path: allPath,
-          strokeColor: '#EB5E1A',
-          strokeWeight: 4,
-          strokeOpacity: 0.9,
-          lineJoin: 'round'
-        });
+        routePolyline = new AMap.Polyline({ path: allPath, strokeColor: '#EB5E1A', strokeWeight: 4, strokeOpacity: 0.9, lineJoin: 'round' });
         map.add(routePolyline);
         map.setFitView([routePolyline]);
       }
     }
 
-    // ==================== 显示路线面板 ====================
+    // ==================== 路线面板 ====================
     function showRoutePanel(info, type) {
       var panel = document.getElementById('route-panel');
       panel.style.display = 'block';
-
       document.getElementById('rp-dest').textContent = currentDest.name;
-
-      var dist = info.distance ? (info.distance > 1000 ? (info.distance/1000).toFixed(1) + 'km' : info.distance + 'm') : '—';
-      var time = info.duration ? Math.ceil(info.duration / 60) + '分钟' : '—';
-      var cost = info.cost ? '，费用约¥' + (typeof info.cost === 'number' ? info.cost.toFixed(1) : info.cost) : '';
-      var icon = routeTypeIcons[type] || '🚗';
-
+      var dist = info.distance > 1000 ? (info.distance/1000).toFixed(1) + 'km' : info.distance + 'm';
+      var time = Math.ceil(info.duration / 60) + '分钟';
+      var cost = info.cost ? '，费用¥' + (typeof info.cost === 'number' ? info.cost.toFixed(1) : info.cost) : '';
       document.getElementById('rp-summary').innerHTML =
-        icon + ' <span>' + dist + '</span> · <span>' + time + '</span>' + cost;
-
+        routeIcons[type] + ' <span>' + dist + '</span> · <span>' + time + '</span>' + cost;
       renderSteps(currentAllSteps);
     }
 
@@ -690,41 +497,26 @@
       var panel = document.getElementById('route-panel');
       panel.style.display = 'block';
       document.getElementById('rp-dest').textContent = currentDest ? currentDest.name : '—';
-      document.getElementById('rp-summary').innerHTML = '❌ 路线规划失败，请尝试其他出行方式';
+      document.getElementById('rp-summary').innerHTML = '❌ 路线规划失败';
       document.getElementById('rp-steps').innerHTML = '';
     }
 
-    // ==================== 渲染步骤列表 ====================
     function renderSteps(steps) {
-      var container = document.getElementById('rp-steps');
+      var c = document.getElementById('rp-steps');
       var html = '';
-
-      // 最多显示12步
-      var shown = steps.slice(0, 12);
-
-      shown.forEach(function(s) {
-        var distStr = s.distance ? (s.distance > 1000
-          ? (s.distance/1000).toFixed(1) + 'km'
-          : s.distance + 'm') : '';
-        var stepClass = s.type === 'bus' ? 'bus-step' : (s.type === 'walk' ? 'walk-step' : '');
-        var borderColor = s.type === 'bus' ? '#EB5E1A' : (s.type === 'walk' ? '#50E3C2' : '#EB5E1A');
-        var iconBg = s.type === 'bus' ? '#EB5E1A' : (s.type === 'walk' ? '#50E3C2' : '#EB5E1A');
-
-        html += '<div class="rp-step ' + stepClass + '">' +
-          '<div class="step-icon" style="background:' + iconBg + '">' + s.num + '</div>' +
+      steps.slice(0, 12).forEach(function(s) {
+        var ds = s.distance > 1000 ? (s.distance/1000).toFixed(1) + 'km' : (s.distance || 0) + 'm';
+        html += '<div class="rp-step">' +
+          '<div class="step-icon">' + s.num + '</div>' +
           '<div style="flex:1">' +
             '<div class="step-text">' + s.instruction.replace(/<[^>]+>/g, '') + '</div>' +
-            (distStr ? '<div class="step-dist">距离: ' + distStr + '</div>' : '') +
-            (s.road && s.road !== s.instruction.replace(/<[^>]+>/g, '') ? '<div class="step-road">📌 ' + s.road + '</div>' : '') +
+            (s.distance ? '<div class="step-dist">距离: ' + ds + '</div>' : '') +
+            (s.road ? '<div class="step-road">📌 ' + s.road + '</div>' : '') +
           '</div>' +
         '</div>';
       });
-
-      if (steps.length > 12) {
-        html += '<div style="text-align:center;padding:8px;color:#999;font-size:12px">...共' + steps.length + '步</div>';
-      }
-
-      container.innerHTML = html;
+      if (steps.length > 12) html += '<div style="text-align:center;padding:8px;color:#999;font-size:12px">...共' + steps.length + '步</div>';
+      c.innerHTML = html;
     }
 
     // ==================== 清除路线 ====================
@@ -737,10 +529,7 @@
 
     // ==================== 工具栏 ====================
     function resetView() {
-      if (map) {
-        map.setZoomAndCenter(14, currentPos);
-        log('已回到起点视图');
-      }
+      if (map) { map.setZoomAndCenter(14, currentPos); log('已回到起点'); }
     }
 
     function toggleTraffic() {
@@ -749,63 +538,47 @@
         trafficLayer = new AMap.TileLayer.Traffic({ zIndex: 8 });
         map.addLayer(trafficLayer);
         btn.classList.add('active');
-        log('已开启实时路况');
+        trafficOn = true;
+        log('✅ 已开启实时路况');
       } else {
-        if (btn.classList.contains('active')) {
-          trafficLayer.hide();
-          btn.classList.remove('active');
-          log('已关闭实时路况');
-        } else {
-          trafficLayer.show();
-          btn.classList.add('active');
-          log('已开启实时路况');
-        }
+        if (trafficOn) { trafficLayer.hide(); btn.classList.remove('active'); trafficOn = false; log('⛔ 已关闭'); }
+        else { trafficLayer.show(); btn.classList.add('active'); trafficOn = true; log('✅ 已开启'); }
       }
     }
 
     function toggleMapStyle() {
       mapStyleIdx = (mapStyleIdx + 1) % mapStyles.length;
       if (map) {
-        map.setMapStyle(mapStyles[mapStyleIdx]);
-        log('地图样式: ' + mapStyleNames[mapStyleIdx]);
+        map.setMapStyle('amap://styles/' + mapStyles[mapStyleIdx]);
+        log('🗺️ 样式: ' + mapStyleNames[mapStyleIdx]);
       }
     }
 
     // ==================== 定位 ====================
     function locateMe() {
-      log('定位中...');
+      log('📍 定位中...');
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(p) {
           currentPos = [p.coords.longitude, p.coords.latitude];
-          if (map) {
-            map.setCenter(currentPos);
-            map.setZoom(15);
-          }
+          if (map) { map.setCenter(currentPos); map.setZoom(15); }
           renderStartMarker();
           document.getElementById('startInput').value = '我的位置';
-          log('定位成功: ' + currentPos[0].toFixed(4) + ',' + currentPos[1].toFixed(4));
+          log('✅ 定位成功: ' + currentPos[0].toFixed(4) + ',' + currentPos[1].toFixed(4));
         }, function(e) {
-          log('定位失败: ' + (e.message || '权限拒绝'));
+          log('❌ 定位失败: ' + (e.message || '权限'));
         }, { enableHighAccuracy: true, timeout: 8000 });
       } else {
-        log('浏览器不支持定位');
+        log('❌ 浏览器不支持');
       }
     }
 
     // ==================== 回车事件 ====================
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('keyword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') doSearch();
-      });
+      document.getElementById('keyword').addEventListener('keypress', function(e) { if (e.key === 'Enter') doSearch(); });
       document.getElementById('endInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && this.value.trim()) {
-          setDestination(null, null, this.value.trim());
-        }
+        if (e.key === 'Enter' && this.value.trim()) setDestination(null, null, this.value.trim());
       });
     });
-
-    // ==================== 启动 ====================
-    loadAMap();
   </script>
 </body>
 </html>

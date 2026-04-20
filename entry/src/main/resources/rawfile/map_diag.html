@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>地图诊断</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1e1e1e; color: #0f0; }
+    .ok { color: #0f0; }
+    .fail { color: #f55; }
+    .warn { color: #ff0; }
+    .title { font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 16px; }
+    .item { margin: 8px 0; padding: 8px; border-left: 3px solid #555; }
+    pre { background: #111; padding: 12px; border-radius: 6px; font-size: 12px; overflow-x: auto; color: #aaa; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="title">高德地图诊断</div>
+  <div id="log"></div>
+  <div id="map-test" style="width:100%;height:300px;margin-top:16px;border:2px solid #333;background:#222"></div>
+
+  <script>
+    var JS_KEY = '3a5628188e4853dcff3425f59058a32b';
+    var WEB_KEY = '5c4aff1e82b1c39bd6733d6146fa9caa';
+
+    function log(msg, type) {
+      var d = document.getElementById('log');
+      var cls = type || 'warn';
+      d.innerHTML += '<div class="item ' + cls + '">' + msg + '</div>';
+    }
+    function show(key, val) {
+      document.getElementById('log').innerHTML += '<div class="item"><b>' + key + ':</b> ' + val + '</div>';
+    }
+
+    log('1. UA: ' + navigator.userAgent.substring(0, 60));
+    log('2. 测试REST API...', 'warn');
+    fetch('https://restapi.amap.com/v3/place/text?key=' + WEB_KEY + '&keywords=test&city=beijing&offset=1&output=json')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.status === '1') log('3. REST API OK', 'ok');
+        else log('3. REST API 异常: ' + d.info, 'fail');
+      })
+      .catch(function(e) { log('3. REST 失败: ' + e.message, 'fail'); });
+
+    log('4. 测试JS API v1.4.15 (callback方式)...', 'warn');
+    window.onAMapReady_v1 = function() {
+      log('5. v1.4.15 callback成功!', 'ok');
+      try {
+        var m = new AMap.Map('map-test', { zoom: 12, center: [116.397428, 39.90923] });
+        log('6. AMap.Map实例化成功', 'ok');
+      } catch(e) { log('6. 失败: ' + e.message, 'fail'); }
+    };
+    var sc1 = document.createElement('script');
+    sc1.src = 'https://webapi.amap.com/maps?v=1.4.15&key=' + JS_KEY + '&callback=onAMapReady_v1';
+    sc1.onerror = function() { log('5. v1.4.15加载失败', 'fail'); };
+    document.head.appendChild(sc1);
+  </script>
+</body>
+</html>
