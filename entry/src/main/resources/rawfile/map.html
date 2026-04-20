@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>地图导航</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -140,6 +140,7 @@
       position: fixed; bottom: 8px; left: 8px;
       background: rgba(0,0,0,0.55); color: #0f0; font-size: 10px;
       padding: 4px 8px; border-radius: 4px; z-index: 9999; max-width: 65%; opacity: 0.7;
+      word-break: break-all;
     }
 
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -201,10 +202,18 @@
   <!-- 定位按钮 -->
   <button id="locBtn" onclick="locateMe()">📍</button>
 
-  <div id="debug">地图加载中...</div>
+  <div id="debug">🔑 初始化安全密钥...</div>
 
-  <!-- 高德地图 v1.4.15 (callback方式，最稳定) -->
-  <script src="https://webapi.amap.com/maps?v=1.4.15&key=3a5628188e4853dcff3425f59058a32b&callback=onAMapReady"></script>
+  <!-- ========== 关键：必须先定义安全密钥配置，再加载地图 ========== -->
+  <script>
+    // 安全密钥配置（必须在加载地图JS之前定义）
+    window._AMapSecurityConfig = {
+      securityJsCode: '24b4877388301846de3978ea560d6c25'
+    };
+  </script>
+
+  <!-- 高德地图 JS API v2.0 + securityJsCode -->
+  <script src="https://webapi.amap.com/maps?v=2.0&key=3a5628188e4853dcff3425f59058a32b&plugin=AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Riding,AMap.Transfer&callback=onAMapReady"></script>
 
   <script>
     // ==================== 全局变量 ====================
@@ -223,6 +232,7 @@
     var mapStyleNames = ['默认', '浅色', '深色', '马卡龙'];
     var mapLoaded = false;
     var trafficOn = false;
+    var loadTimeout = null;
 
     // API Key (Web服务Key用于REST API)
     var WEB_KEY = '5c4aff1e82b1c39bd6733d6146fa9caa';
@@ -233,9 +243,28 @@
       if (d) d.innerHTML = msg;
     }
 
-    // ==================== 地图初始化回调 (通过callback参数调用) ====================
+    // ==================== 地图初始化回调 ====================
     function onAMapReady() {
-      log('地图引擎就绪，初始化中...');
+      log('🔧 地图引擎就绪，初始化插件...');
+      try {
+        // v2.0: 动态加载插件（更可靠）
+        AMap.plugin([
+          'AMap.PlaceSearch',
+          'AMap.Driving',
+          'AMap.Walking',
+          'AMap.Riding',
+          'AMap.Transfer',
+          'AMap.Geolocation'
+        ], function() {
+          log('✅ 插件加载完成，创建地图...');
+          initMap();
+        });
+      } catch(e) {
+        log('❌ 插件加载错误: ' + e.message);
+      }
+    }
+
+    function initMap() {
       try {
         map = new AMap.Map('container', {
           zoom: 13,
@@ -251,6 +280,7 @@
         });
 
         mapLoaded = true;
+        clearTimeout(loadTimeout);
         renderStartMarker();
         log('✅ 就绪 | 搜索或点击地图选终点');
       } catch(e) {
@@ -258,15 +288,21 @@
       }
     }
 
-    // 超时检测（地图3秒内未加载则报错）
-    setTimeout(function() {
+    // 超时兜底（12秒内未加载则报错）
+    loadTimeout = setTimeout(function() {
       if (!mapLoaded) {
-        log('❌ 地图加载超时，请检查网络');
+        log('❌ 加载超时，<a href="javascript:retryLoad()" style="color:#0f0">点此重试</a>');
       }
-    }, 8000);
+    }, 12000);
+
+    function retryLoad() {
+      log('重新加载中...');
+      location.reload();
+    }
 
     // ==================== 起点标记 ====================
     function renderStartMarker() {
+      if (!map) return;
       if (markerStart) map.remove(markerStart);
       markerStart = new AMap.Marker({
         position: currentPos,
