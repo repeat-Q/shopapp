@@ -227,7 +227,7 @@
     var routePolyline = null;
     var routeCopyLine = null;
     var trafficLayer = null;
-    var currentPos = [116.397428, 39.90923];
+    var currentPos = null; // 不预填起点，让用户自己设置
     var currentDest = null;
     var currentRouteType = 'driving';
     var currentAllSteps = [];
@@ -297,7 +297,7 @@
       try {
         log('🗺️ 创建地图...');
         map = new AMap.Map('container', {
-          zoom: 13, center: currentPos, resizeEnable: true, viewMode: '2D'
+          zoom: 13, center: [116.397428, 39.90923], resizeEnable: true, viewMode: '2D'
         });
         // 初始化起点显示（不设默认值，让用户自己填）
         setInputText('startInput', '');
@@ -307,6 +307,12 @@
           if (mapClickMode === 'start') {
             setStartPoint(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
           } else {
+            // 如果没有起点，先设置起点
+            if (!currentPos) {
+              setStartPoint(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
+              log('已自动设置起点，请再点设置终点');
+              return;
+            }
             setInputText('endInput', '地图选点');
             setDestination(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
           }
@@ -314,14 +320,14 @@
 
         map.on('complete', function() {
           mapLoaded = true;
-          renderStartMarker();
-          log('✅ 地图就绪！请设置起终点');
+          // 不再自动画起点标记，等用户设置
+          log('✅ 地图就绪！点击地图或搜索设置起终点');
         });
 
         setTimeout(function() {
           if (!mapLoaded) {
             mapLoaded = true;
-            renderStartMarker();
+            // 不再自动画起点标记
             log('✅ 地图就绪！请设置起终点');
           }
         }, 4000);
@@ -381,6 +387,8 @@
     function renderStartMarker() {
       if (!map) return;
       if (markerStart) map.remove(markerStart);
+      markerStart = null;
+      if (!currentPos) return; // 没有起点就不画
       markerStart = new AMap.Marker({
         position: currentPos, map: map,
         content: '<div style="background:#50E3C2;width:14px;height:14px;border-radius:50%;border:3px solid #fff"></div>',
@@ -394,6 +402,7 @@
       document.getElementById('result-list-start').style.display = 'none';
       mapClickMode = 'end';
       renderStartMarker();
+      if (map) map.setCenter(currentPos);
       if (currentDest) planRoute();
       log('✅ 起点: ' + name);
     }
@@ -506,6 +515,7 @@
 
     function planRoute() {
       if (!currentDest || !map) return;
+      if (!currentPos) { log('⚠️ 请先设置起点'); return; }
       log('🧭 规划' + routeNames[currentRouteType] + '路线...');
       clearRoute();
 
@@ -678,7 +688,11 @@
     }
 
     function resetView() {
-      if (map) { map.setZoomAndCenter(14, currentPos); log('已回到起点'); }
+      if (map) {
+        var center = currentPos || [116.397428, 39.90923];
+        map.setZoomAndCenter(14, center);
+        log('已回到起点');
+      }
     }
 
     function toggleTraffic() {
@@ -781,7 +795,7 @@
       // 互换按钮
       var swapBtn = document.getElementById('btnSwap');
       if (swapBtn) swapBtn.onclick = function() {
-        if (!currentDest) return;
+        if (!currentDest || !currentPos) return;
         var tmpLng = currentPos[0], tmpLat = currentPos[1];
         currentPos = [currentDest.lng, currentDest.lat];
         currentDest = { lng: tmpLng, lat: tmpLat, name: getInputRaw('startInput') };
