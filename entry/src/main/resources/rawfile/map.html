@@ -40,6 +40,7 @@
     }
     .fake-input:active { background: #f0f0f0; }
     .fake-input.empty { color: #aaa; }
+    .fake-input { touch-action: manipulation; pointer-events: auto; -webkit-user-select: none; }
     .start-row .fake-input { background: #f0fdf9; border-color: #bbf7d0; }
     .start-row .fake-input.empty { color: #6ee7b7; }
     .swap-btn {
@@ -269,6 +270,41 @@
     }
 
     // ====== 4.5 fake-input 辅助函数（兼容div替代input）======
+    var inputClickLock = 0; // 防重复触发锁（全局）
+
+    function rebindInputClicks() {
+      var si = document.getElementById('startInput');
+      var ei = document.getElementById('endInput');
+      if (si) {
+        si.ontouchend = function(e) {
+          e.preventDefault(); e.stopPropagation();
+          if (Date.now() - inputClickLock < 400) return;
+          inputClickLock = Date.now();
+          doSearchStart();
+        };
+        si.onclick = function(e) {
+          e.stopPropagation();
+          if (Date.now() - inputClickLock < 400) return;
+          inputClickLock = Date.now();
+          doSearchStart();
+        };
+      }
+      if (ei) {
+        ei.ontouchend = function(e) {
+          e.preventDefault(); e.stopPropagation();
+          if (Date.now() - inputClickLock < 400) return;
+          inputClickLock = Date.now();
+          doSearchEnd();
+        };
+        ei.onclick = function(e) {
+          e.stopPropagation();
+          if (Date.now() - inputClickLock < 400) return;
+          inputClickLock = Date.now();
+          doSearchEnd();
+        };
+      }
+    }
+
     function getInputText(id) {
       var el = document.getElementById(id);
       return el ? el.textContent : '';
@@ -276,14 +312,16 @@
     function setInputText(id, text) {
       var el = document.getElementById(id);
       if (!el) return;
-      el.textContent = text;
       var ph = el.getAttribute('data-placeholder') || '';
       if (!text || text === ph) {
         el.textContent = ph;
         el.className = 'fake-input empty';
       } else {
+        el.textContent = text;
         el.className = 'fake-input';
       }
+      // 重新绑定点击事件（防止DOM修改后事件丢失）
+      rebindInputClicks();
     }
     function getInputRaw(id) {
       var el = document.getElementById(id);
@@ -337,9 +375,10 @@
     }
 
     // ====== 6. 动态加载地图JS ======
+    // 策略：v2.0 优先（配合 securityJsCode），失败降级 v1.4.15
     function loadAMapScript(version) {
       log('📦 加载地图 v' + version + '...');
-      var plugins = 'AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Transfer';
+      var plugins = 'AMap.PlaceSearch,AMap.Driving,AMap.Walking,AMap.Transfer,AMap.Geolocation';
       var url = 'https://webapi.amap.com/maps?v=' + version +
         '&key=' + JS_KEY + '&plugin=' + plugins;
 
@@ -349,7 +388,7 @@
         log('📦 v' + version + ' 已下载');
         if (version === '2.0' && AMap && AMap.plugin) {
           try {
-            AMap.plugin(['AMap.PlaceSearch', 'AMap.Driving', 'AMap.Walking', 'AMap.Transfer'], function() {
+            AMap.plugin(['AMap.PlaceSearch', 'AMap.Driving', 'AMap.Walking', 'AMap.Transfer', 'AMap.Geolocation'], function() {
               log('🔌 插件就绪');
               createMap();
             });
@@ -357,7 +396,7 @@
             log('⚠️ 插件失败，直接创建地图: ' + e);
             createMap();
           }
-          // 保险：如果3秒后还没创建地图，强制调用
+          // 保险：3秒后还没创建地图就强制调用
           setTimeout(function() {
             if (!map) { log('⏰ 超时强制创建地图'); createMap(); }
           }, 3000);
@@ -450,6 +489,8 @@
       document.getElementById('result-list-start').style.display = 'none';
       document.getElementById('keyword').value = '';
       mapClickMode = 'end';
+      // 取消搜索后重新绑定输入框事件
+      rebindInputClicks();
     }
 
     function doKeywordSearch() {
@@ -764,43 +805,65 @@
     function bindAllEvents() {
       log('🔗 开始绑定事件...');
 
-      // 事件委托到document，startInput和endInput的点击都用委托处理
-      // 避免setInputText修改DOM后事件失效的问题
+      // 起点/终点框点击 —— 用事件委托保证setInputText改DOM后仍然有效
+      // 使用标记锁防止 touchstart + click 双重触发
       document.addEventListener('click', function(e) {
         var t = e.target;
-        // 找到被点击的元素（可能是点击在子元素上）
         while (t && t !== document.body) {
-          if (t.id === 'startInput') { log('⚡ 点击:起点'); doSearchStart(); return; }
-          if (t.id === 'endInput') { log('⚡ 点击:终点'); doSearchEnd(); return; }
+          if (t.id === 'startInput') {
+            if (Date.now() - inputClickLock < 400) return; // 防重复
+            inputClickLock = Date.now();
+            log('⚡ click:起点'); doSearchStart(); return;
+          }
+          if (t.id === 'endInput') {
+            if (Date.now() - inputClickLock < 400) return;
+            inputClickLock = Date.now();
+            log('⚡ click:终点'); doSearchEnd(); return;
+          }
           t = t.parentElement;
         }
       });
 
-      // 触摸事件也用委托（模拟机touch更可靠）
+      // touchstart 委托（HarmonyOS WebView触摸更可靠）
       document.addEventListener('touchstart', function(e) {
         var t = e.target;
         while (t && t !== document.body) {
-          if (t.id === 'startInput') { e.preventDefault(); log('⚡ 触摸:起点'); doSearchStart(); return; }
-          if (t.id === 'endInput') { e.preventDefault(); log('⚡ 触摸:终点'); doSearchEnd(); return; }
+          if (t.id === 'startInput') {
+            e.preventDefault();
+            if (Date.now() - inputClickLock < 400) return;
+            inputClickLock = Date.now();
+            log('⚡ touch:起点'); doSearchStart(); return;
+          }
+          if (t.id === 'endInput') {
+            e.preventDefault();
+            if (Date.now() - inputClickLock < 400) return;
+            inputClickLock = Date.now();
+            log('⚡ touch:终点'); doSearchEnd(); return;
+          }
           t = t.parentElement;
         }
       }, { passive: false });
+
+      // 兜底：直接给起点/终点框绑事件（某些机型touchstart/click都不冒泡）
+      rebindInputClicks();
 
       // 互换按钮
       var swapBtn = document.getElementById('btnSwap');
       if (swapBtn) swapBtn.onclick = function() {
         if (!currentDest || !currentPos) return;
         var tmpLng = currentPos[0], tmpLat = currentPos[1];
+        var tmpStartName = getInputRaw('startInput');
         currentPos = [currentDest.lng, currentDest.lat];
-        currentDest = { lng: tmpLng, lat: tmpLat, name: getInputRaw('startInput') };
+        currentDest = { lng: tmpLng, lat: tmpLat, name: tmpStartName };
         setInputText('startInput', currentDest.name);
         setInputText('endInput', '地图选点');
+        rebindInputClicks();
         renderStartMarker();
         planRoute();
         log('已互换起终点');
       };
 
-      // 路线Tab（用addEventListener，更可靠）
+      // 路线Tab
       var tabsEl = document.getElementById('route-tabs');
       if (tabsEl) {
         tabsEl.addEventListener('click', function(e) {
@@ -818,15 +881,15 @@
 
       // 搜索/取消按钮
       var btnSrch = document.getElementById('btnDoSearch');
-      if (btnSrch) btnSrch.onclick = function() { log('⚡ 点击了搜索'); doKeywordSearch(); };
+      if (btnSrch) btnSrch.onclick = function() { doKeywordSearch(); };
 
       var btnCancel = document.getElementById('btnCancelSearch');
-      if (btnCancel) btnCancel.onclick = function() { cancelKeywordSearch(); log('已取消搜索'); };
+      if (btnCancel) btnCancel.onclick = function() { cancelKeywordSearch(); };
 
       // 关键词回车
       var kwInput = document.getElementById('keyword');
       if (kwInput) kwInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { log('⚡ 回车搜索'); doKeywordSearch(); }
+        if (e.key === 'Enter') { doKeywordSearch(); }
       });
 
       // 工具栏
@@ -847,10 +910,7 @@
         if (e.target.id === 'retryBtn') location.reload();
       };
 
-      log('✅ 事件绑定完成，共绑定了' +
-        (si?1:0) + (ei?1:0) +
-        (swapBtn?1:0) + (tabsEl?1:0) + (btnSrch?1:0) + (btnCancel?1:0) +
-        (kwInput?1:0) + (tb?1:0) + (br?1:0) + (bs?1:0) + (lb?1:0) + (db?1:0) + '个元素');
+      log('✅ 事件绑定完成');
     }
 
     // ====== 9. 启动（等DOM就绪）======
@@ -860,7 +920,6 @@
         loadAMapScript('2.0');
       });
     } else {
-      // DOM已经就绪
       bindAllEvents();
       loadAMapScript('2.0');
     }

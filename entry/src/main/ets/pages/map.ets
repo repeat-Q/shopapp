@@ -9,12 +9,6 @@ export struct map {
 
   build() {
     Column() {
-      // 顶部透明占位（隐藏原生导航栏，由H5面板做顶栏）
-      Row()
-        .width('100%')
-        .height(0)
-        .visibility(Visibility.Hidden)
-
       // 地图WebView（占据全屏，H5负责顶部面板和工具栏）
       Web({
         src: $rawfile('map.html'),
@@ -25,6 +19,9 @@ export struct map {
         .javaScriptAccess(true)
         .geolocationAccess(true)
         .domStorageAccess(true)
+        .databaseAccess(true)
+        .cacheMode(CacheMode.Default)
+        .textZoomRatio(100)
         .onPageEnd(() => {
           this.isLoaded = true
         })
