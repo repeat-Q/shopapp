@@ -760,37 +760,31 @@
       }
     }
 
-    // ====== 8. 事件绑定（全部用DOMContentLoaded包裹，不用HTML onclick）======
+    // ====== 8. 事件绑定（用事件委托，绑定到document，不受DOM修改影响）======
     function bindAllEvents() {
       log('🔗 开始绑定事件...');
 
-      // 起点div点击（用touchstart+click双保险，模拟机touch事件更可靠）
-      var si = document.getElementById('startInput');
-      if (si) {
-        si.addEventListener('touchstart', function(e) {
-          e.preventDefault(); // 阻止后续click，防止双触发
-          log('⚡ 起点:touchstart');
-          doSearchStart();
-        }, { passive: false });
-        si.addEventListener('click', function() {
-          log('⚡ 起点:click');
-          doSearchStart();
-        });
-      } else { log('❌ 找不到startInput'); }
+      // 事件委托到document，startInput和endInput的点击都用委托处理
+      // 避免setInputText修改DOM后事件失效的问题
+      document.addEventListener('click', function(e) {
+        var t = e.target;
+        // 找到被点击的元素（可能是点击在子元素上）
+        while (t && t !== document.body) {
+          if (t.id === 'startInput') { log('⚡ 点击:起点'); doSearchStart(); return; }
+          if (t.id === 'endInput') { log('⚡ 点击:终点'); doSearchEnd(); return; }
+          t = t.parentElement;
+        }
+      });
 
-      // 终点div点击
-      var ei = document.getElementById('endInput');
-      if (ei) {
-        ei.addEventListener('touchstart', function(e) {
-          e.preventDefault();
-          log('⚡ 终点:touchstart');
-          doSearchEnd();
-        }, { passive: false });
-        ei.addEventListener('click', function() {
-          log('⚡ 终点:click');
-          doSearchEnd();
-        });
-      } else { log('❌ 找不到endInput'); }
+      // 触摸事件也用委托（模拟机touch更可靠）
+      document.addEventListener('touchstart', function(e) {
+        var t = e.target;
+        while (t && t !== document.body) {
+          if (t.id === 'startInput') { e.preventDefault(); log('⚡ 触摸:起点'); doSearchStart(); return; }
+          if (t.id === 'endInput') { e.preventDefault(); log('⚡ 触摸:终点'); doSearchEnd(); return; }
+          t = t.parentElement;
+        }
+      }, { passive: false });
 
       // 互换按钮
       var swapBtn = document.getElementById('btnSwap');
