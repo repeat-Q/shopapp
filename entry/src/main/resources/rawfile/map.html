@@ -29,24 +29,19 @@
     .input-group { flex: 1; }
     .input-row { position: relative; margin-bottom: 4px; }
     .input-row:last-child { margin-bottom: 0; }
-    .input-row input {
+    /* 用div模拟input，避免模拟机input点击被系统拦截 */
+    .fake-input {
       width: 100%; height: 34px; border: 1px solid #e0e0e0;
-      border-radius: 8px; padding: 0 36px 0 10px; font-size: 13px;
-      outline: none; background: #fafafa; display: block;
+      border-radius: 8px; padding: 0 10px; font-size: 13px;
+      background: #fafafa; display: flex; align-items: center;
+      cursor: pointer; color: #333; overflow: hidden;
+      white-space: nowrap; text-overflow: ellipsis; -webkit-user-select: none;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.05);
     }
-    .input-row input.start-row { background: #f0fdf9; border-color: #bbf7d0; }
-    .input-row input:focus { border-color: #EB5E1A; background: #fff; }
-    .input-row input.start-row:focus { border-color: #50E3C2; }
-    .input-row .btn-edit {
-      position: absolute; right: 4px; top: 50%;
-      transform: translateY(-50%);
-      width: 28px; height: 28px;
-      background: none; border: none;
-      font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      border-radius: 4px;
-    }
-    .input-row .btn-edit:active { background: rgba(0,0,0,0.06); }
+    .fake-input:active { background: #f0f0f0; }
+    .fake-input.empty { color: #aaa; }
+    .start-row .fake-input { background: #f0fdf9; border-color: #bbf7d0; }
+    .start-row .fake-input.empty { color: #6ee7b7; }
     .swap-btn {
       width: 28px; height: 28px; border: 1px solid #e0e0e0; background: #f5f5f5;
       border-radius: 50%; cursor: pointer; font-size: 14px;
@@ -166,15 +161,13 @@
         <div class="dot end"></div>
       </div>
       <div class="input-group">
-        <!-- 起点行 -->
+        <!-- 起点行 - 用div代替input，模拟机input点击事件会被系统拦截 -->
         <div class="input-row start-row">
-          <input id="startInput" type="text" placeholder="点击这里设置起点" value="天安门广场">
-          <button class="btn-edit" id="btnStartEdit" title="编辑起点">✏️</button>
+          <div id="startInput" class="fake-input" data-placeholder="点击设置起点">点击设置起点</div>
         </div>
         <!-- 终点行 -->
         <div class="input-row">
-          <input id="endInput" type="text" placeholder="点击这里设置终点">
-          <button class="btn-edit" id="btnEndEdit" title="编辑终点">✏️</button>
+          <div id="endInput" class="fake-input" data-placeholder="点击设置终点">点击设置终点</div>
         </div>
       </div>
       <button class="swap-btn" id="btnSwap" title="互换起终点">⇅</button>
@@ -275,6 +268,30 @@
       if (d) d.innerHTML = msg;
     }
 
+    // ====== 4.5 fake-input 辅助函数（兼容div替代input）======
+    function getInputText(id) {
+      var el = document.getElementById(id);
+      return el ? el.textContent : '';
+    }
+    function setInputText(id, text) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      var ph = el.getAttribute('data-placeholder') || '';
+      if (!text || text === ph) {
+        el.textContent = ph;
+        el.className = 'fake-input empty';
+      } else {
+        el.className = 'fake-input';
+      }
+    }
+    function getInputRaw(id) {
+      var el = document.getElementById(id);
+      var ph = el ? el.getAttribute('data-placeholder') || '' : '';
+      var text = el ? el.textContent : '';
+      return (text === ph) ? '' : text;
+    }
+
     // ====== 5. 创建地图 ======
     function createMap() {
       try {
@@ -282,12 +299,15 @@
         map = new AMap.Map('container', {
           zoom: 13, center: currentPos, resizeEnable: true, viewMode: '2D'
         });
+        // 初始化起点显示（不设默认值，让用户自己填）
+        setInputText('startInput', '');
+        setInputText('endInput', '');
 
         map.on('click', function(e) {
           if (mapClickMode === 'start') {
             setStartPoint(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
           } else {
-            document.getElementById('endInput').value = '地图选点';
+            setInputText('endInput', '地图选点');
             setDestination(e.lnglat.getLng(), e.lnglat.getLat(), '地图选点');
           }
         });
@@ -370,7 +390,7 @@
 
     function setStartPoint(lng, lat, name) {
       currentPos = [lng, lat];
-      document.getElementById('startInput').value = name;
+      setInputText('startInput', name);
       document.getElementById('result-list-start').style.display = 'none';
       mapClickMode = 'end';
       renderStartMarker();
@@ -380,14 +400,14 @@
 
     function setDestination(lng, lat, name) {
       currentDest = { lng: lng, lat: lat, name: name };
-      document.getElementById('endInput').value = name;
+      setInputText('endInput', name);
       document.getElementById('result-list').style.display = 'none';
       planRoute();
     }
 
     function doSearchStart() {
       mapClickMode = 'start';
-      var kw = document.getElementById('startInput').value.replace(/天安门广场|地图选点/g, '').replace(/^\s+|\s+$/, '');
+      var kw = getInputRaw('startInput').replace(/地图选点/g, '').replace(/^\s+|\s+$/, '');
       document.getElementById('keyword').value = kw;
       document.getElementById('keyword').placeholder = '输入起点地名';
       document.getElementById('result-list').style.display = 'none';
@@ -402,7 +422,7 @@
 
     function doSearchEnd() {
       mapClickMode = 'end';
-      var kw = document.getElementById('endInput').value.replace(/地图选点/g, '').replace(/^\s+|\s+$/, '');
+      var kw = getInputRaw('endInput').replace(/地图选点/g, '').replace(/^\s+|\s+$/, '');
       document.getElementById('keyword').value = kw;
       document.getElementById('keyword').placeholder = '输入终点地名';
       document.getElementById('result-list-start').style.display = 'none';
@@ -698,7 +718,7 @@
               map.setCenter(currentPos);
               map.setZoom(15);
               renderStartMarker();
-              document.getElementById('startInput').value = '我的位置';
+              setInputText('startInput', '我的位置');
               log('✅ 定位成功');
             } else { fallbackBrowserGeo(); }
           });
@@ -712,7 +732,7 @@
           currentPos = [p.coords.longitude, p.coords.latitude];
           if (map) { map.setCenter(currentPos); map.setZoom(15); }
           renderStartMarker();
-          document.getElementById('startInput').value = '我的位置';
+          setInputText('startInput', '我的位置');
           log('✅ 定位成功');
         }, function(e) {
           var msg = '定位失败';
@@ -730,25 +750,33 @@
     function bindAllEvents() {
       log('🔗 开始绑定事件...');
 
-      // 起点编辑按钮
-      var btnStart = document.getElementById('btnStartEdit');
-      if (btnStart) btnStart.onclick = function() { log('⚡ 点击了起点按钮'); doSearchStart(); };
-      else log('❌ 找不到btnStartEdit');
-
-      // 终点编辑按钮
-      var btnEnd = document.getElementById('btnEndEdit');
-      if (btnEnd) btnEnd.onclick = function() { log('⚡ 点击了终点按钮'); doSearchEnd(); };
-      else log('❌ 找不到btnEndEdit');
-
-      // 起点输入框点击
+      // 起点div点击（用touchstart+click双保险，模拟机touch事件更可靠）
       var si = document.getElementById('startInput');
-      if (si) si.onclick = function() { log('⚡ 点击了起点输入框'); doSearchStart(); };
-      else log('❌ 找不到startInput');
+      if (si) {
+        si.addEventListener('touchstart', function(e) {
+          e.preventDefault(); // 阻止后续click，防止双触发
+          log('⚡ 起点:touchstart');
+          doSearchStart();
+        }, { passive: false });
+        si.addEventListener('click', function() {
+          log('⚡ 起点:click');
+          doSearchStart();
+        });
+      } else { log('❌ 找不到startInput'); }
 
-      // 终点输入框点击
+      // 终点div点击
       var ei = document.getElementById('endInput');
-      if (ei) ei.onclick = function() { log('⚡ 点击了终点输入框'); doSearchEnd(); };
-      else log('❌ 找不到endInput');
+      if (ei) {
+        ei.addEventListener('touchstart', function(e) {
+          e.preventDefault();
+          log('⚡ 终点:touchstart');
+          doSearchEnd();
+        }, { passive: false });
+        ei.addEventListener('click', function() {
+          log('⚡ 终点:click');
+          doSearchEnd();
+        });
+      } else { log('❌ 找不到endInput'); }
 
       // 互换按钮
       var swapBtn = document.getElementById('btnSwap');
@@ -756,9 +784,9 @@
         if (!currentDest) return;
         var tmpLng = currentPos[0], tmpLat = currentPos[1];
         currentPos = [currentDest.lng, currentDest.lat];
-        currentDest = { lng: tmpLng, lat: tmpLat, name: document.getElementById('startInput').value };
-        document.getElementById('startInput').value = currentDest.name;
-        document.getElementById('endInput').value = '地图选点';
+        currentDest = { lng: tmpLng, lat: tmpLat, name: getInputRaw('startInput') };
+        setInputText('startInput', currentDest.name);
+        setInputText('endInput', '地图选点');
         renderStartMarker();
         planRoute();
         log('已互换起终点');
@@ -812,7 +840,7 @@
       };
 
       log('✅ 事件绑定完成，共绑定了' +
-        (btnStart?1:0) + (btnEnd?1:0) + (si?1:0) + (ei?1:0) +
+        (si?1:0) + (ei?1:0) +
         (swapBtn?1:0) + (tabsEl?1:0) + (btnSrch?1:0) + (btnCancel?1:0) +
         (kwInput?1:0) + (tb?1:0) + (br?1:0) + (bs?1:0) + (lb?1:0) + (db?1:0) + '个元素');
     }
